@@ -1,9 +1,9 @@
 package initialize
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
-	"github.com/flipped-aurora/gin-vue-admin/server/plugin/announcement/router"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/middleware"
+	"github.com/icosmos-space/iadmin/server/plugin/announcement/router"
 	"github.com/gin-gonic/gin"
 )
 

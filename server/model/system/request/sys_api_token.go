@@ -1,8 +1,8 @@
 package request
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	"github.com/icosmos-space/iadmin/server/model/common/request"
+	"github.com/icosmos-space/iadmin/server/model/system"
 )
 
 type SysApiTokenSearch struct {

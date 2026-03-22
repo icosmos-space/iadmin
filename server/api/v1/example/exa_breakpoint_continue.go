@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
+	"github.com/icosmos-space/iadmin/server/model/example"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-	exampleRes "github.com/flipped-aurora/gin-vue-admin/server/model/example/response"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/model/common/response"
+	exampleRes "github.com/icosmos-space/iadmin/server/model/example/response"
+	"github.com/icosmos-space/iadmin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

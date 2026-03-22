@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/model/system"
+	"github.com/icosmos-space/iadmin/server/model/system/request"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)

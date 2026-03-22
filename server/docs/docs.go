@@ -3,7 +3,7 @@
 package docs
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/swaggo/swag"
 )
 

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/flipped-aurora/gin-vue-admin/server/core"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
+	"github.com/icosmos-space/iadmin/server/core"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/initialize"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )

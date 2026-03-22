@@ -5,10 +5,10 @@ import (
 	"mime/multipart"
 	"strings"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/upload"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/model/example"
+	"github.com/icosmos-space/iadmin/server/model/example/request"
+	"github.com/icosmos-space/iadmin/server/utils/upload"
 	"gorm.io/gorm"
 )
 

@@ -2,9 +2,9 @@ package system
 
 import (
 	"context"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/model/system"
+	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 	"gorm.io/gorm"
 )
 

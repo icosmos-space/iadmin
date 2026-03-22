@@ -15,9 +15,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/model/system"
+	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"gopkg.in/yaml.v3"
 )
 
