@@ -1,3 +1,5 @@
+//go:build driver_pgsql || !driver_custom
+
 package system
 
 import (

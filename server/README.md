@@ -60,3 +60,33 @@
   `go run -tags=dev .` 或 `go build -tags=dev -ldflags="-s -w" -o server .`  
   需 API 文档时请先执行 `swag init`（见仓库根 `Makefile` 的 `doc` 目标）。
 
+### 按需编译 SQL 驱动（减小体积）
+
+默认 **不** 加 `driver_custom` 时，与原先一致：五种 SQL 驱动（MySQL / PostgreSQL / Oracle / SQL Server / SQLite）都会编进二进制。
+
+若需只包含部分驱动，加上 **`driver_custom`**，并列出需要的 **`driver_*`** 标签（至少一个）：
+
+| 标签 | 含义 |
+|------|------|
+| `driver_mysql` | MySQL |
+| `driver_pgsql` | PostgreSQL |
+| `driver_oracle` | Oracle |
+| `driver_mssql` | SQL Server |
+| `driver_sqlite` | SQLite（glebarez / modernc） |
+
+示例（仅 SQLite，常与生产默认配合）：
+
+```bash
+go build -tags "driver_custom,driver_sqlite" -ldflags "-s -w" -o server .
+```
+
+示例（MySQL + SQLite）：
+
+```bash
+go build -tags "driver_custom,driver_mysql,driver_sqlite" -ldflags "-s -w" -o server .
+```
+
+**注意**：启用 `driver_custom` 后，运行时的 `system.db-type` / `db-list` 只能使用已编入的驱动，否则会在连接时 panic 并提示重新编译标签。
+
+本地用 gopls 编辑时，若需要分析某组合驱动，可在 `go.buildTags` / `gopls.build.buildFlags` 中写入相同的 `-tags=...`。
+

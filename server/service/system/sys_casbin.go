@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 
 	gormadapter "github.com/casbin/gorm-adapter/v3"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"github.com/icosmos-space/iadmin/server/utils"

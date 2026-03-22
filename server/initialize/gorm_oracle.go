@@ -1,3 +1,5 @@
+//go:build driver_oracle || !driver_custom
+
 package initialize
 
 import (

@@ -1,3 +1,5 @@
+//go:build driver_sqlite || !driver_custom
+
 package system
 
 import (

@@ -1,3 +1,5 @@
+//go:build driver_mssql || !driver_custom
+
 package initialize
 
 /*

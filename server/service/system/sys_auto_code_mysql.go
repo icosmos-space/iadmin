@@ -1,3 +1,5 @@
+//go:build driver_mysql || !driver_custom
+
 package system
 
 import (
