@@ -21,6 +21,10 @@
     "go.toolsEnvVars": {
       "GOPROXY": "https://goproxy.cn,direct",
       "GONOPROXY": "none;"
+    },
+    "go.buildTags": "dev",
+    "gopls": {
+      "build.buildFlags": ["-tags=dev"]
     }
   },
   "launch": {
