@@ -105,6 +105,8 @@ func Routers() *gin.Engine {
 	// 注册业务路由
 	initBizRouter(PrivateGroup, PublicGroup)
 
+	registerEmbeddedWebUI(Router)
+
 	global.IADMIN_ROUTERS = Router.Routes()
 
 	global.IADMIN_LOG.Info("router register success")

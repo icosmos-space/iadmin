@@ -25,3 +25,12 @@ export const checkDB = () => {
     method: 'post'
   })
 }
+
+// 与后端 driver_custom / driver_* 一致的可选数据库类型
+export const getInitDbTypes = () => {
+  return service({
+    url: '/init/db-types',
+    method: 'get',
+    donNotShowLoading: true
+  })
+}

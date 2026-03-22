@@ -90,3 +90,19 @@ go build -tags "driver_custom,driver_mysql,driver_sqlite" -ldflags "-s -w" -o se
 
 本地用 gopls 编辑时，若需要分析某组合驱动，可在 `go.buildTags` / `gopls.build.buildFlags` 中写入相同的 `-tags=...`。
 
+### 初始化页与后端驱动一致
+
+`internal/initdbcaps` 与 `driver_custom` / `driver_*` 标签同步。接口 **`GET /init/db-types`** 返回 `{ dbTypes: ["mysql", ...] }`，前端初始化页只展示当前二进制支持的类型；提交 **`POST /init/initdb`** 时也会校验，避免选到未编译的驱动。
+
+### 前端嵌入二进制（embedweb）
+
+占位目录：**`initialize/resource/web/dist/`**（与 `initialize/embedded_web.go` 中 `//go:embed` 相对路径一致）。
+
+1. 在仓库根构建前端：`cd web && npm run build`（或 `yarn build`）。
+2. 将 **`web/dist/` 下全部文件** 复制到 **`server/initialize/resource/web/dist/`**（覆盖占位 `index.html`）。
+3. 编译：`go build -tags=embedweb -ldflags "-s -w" -o server .`
+
+启用后，未匹配 API 的页面请求会回退到 `index.html`（SPA）。请保证 **`system.router-prefix`** 与前端环境变量 **`VITE_BASE_API`** 一致（例如均为 `/api`），否则接口路径与静态页会错位。
+
+不加 `-tags=embedweb` 时不嵌入前端，行为与原先一致（可继续用 Nginx 反代静态资源）。
+

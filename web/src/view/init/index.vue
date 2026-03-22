@@ -77,11 +77,12 @@
               class="w-full"
               @change="changeDB"
             >
-              <el-option key="mysql" label="mysql" value="mysql" />
-              <el-option key="pgsql" label="pgsql" value="pgsql" />
-              <el-option key="oracle" label="oracle" value="oracle" />
-              <el-option key="mssql" label="mssql" value="mssql" />
-              <el-option key="sqlite" label="sqlite" value="sqlite" />
+              <el-option
+                v-for="opt in dbTypeOptions"
+                :key="opt.value"
+                :label="opt.label"
+                :value="opt.value"
+              />
             </el-select>
           </el-form-item>
           <el-form-item v-if="form.dbType !== 'sqlite'" label="host">
@@ -134,8 +135,8 @@
 
 <script setup>
   // @ts-ignore
-  import { initDB } from '@/api/initdb'
-  import { reactive, ref } from 'vue'
+  import { getInitDbTypes, initDB } from '@/api/initdb'
+  import { onMounted, reactive, ref } from 'vue'
   import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
   import { useRouter } from 'vue-router'
 
@@ -167,6 +168,15 @@
 
   const out = ref(false)
 
+  const allDbTypeOptions = [
+    { label: 'mysql', value: 'mysql' },
+    { label: 'pgsql', value: 'pgsql' },
+    { label: 'oracle', value: 'oracle' },
+    { label: 'mssql', value: 'mssql' },
+    { label: 'sqlite', value: 'sqlite' }
+  ]
+  const dbTypeOptions = ref([...allDbTypeOptions])
+
   const form = reactive({
     adminPassword: defaultAdminPassword,
           dbType: 'sqlite',
@@ -176,6 +186,23 @@
           password: '',
           dbName: appName,
           dbPath: ''
+  })
+
+  onMounted(async () => {
+    try {
+      const res = await getInitDbTypes()
+      if (res.code === 0 && res.data?.dbTypes?.length) {
+        const allow = new Set(res.data.dbTypes)
+        dbTypeOptions.value = allDbTypeOptions.filter((o) => allow.has(o.value))
+        if (!allow.has(form.dbType) && dbTypeOptions.value.length) {
+          const v = dbTypeOptions.value[0].value
+          form.dbType = v
+          changeDB(v)
+        }
+      }
+    } catch (_) {
+      /* 后端不可用时保留全部选项 */
+    }
   })
 
   const changeDB = (val) => {

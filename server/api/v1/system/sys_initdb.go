@@ -1,7 +1,10 @@
 package system
 
 import (
+	"slices"
+
 	"github.com/icosmos-space/iadmin/server/global"
+	"github.com/icosmos-space/iadmin/server/internal/initdbcaps"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"go.uber.org/zap"
@@ -30,6 +33,11 @@ func (i *DBApi) InitDB(c *gin.Context) {
 		response.FailWithMessage("参数校验不通过", c)
 		return
 	}
+	allowed := initdbcaps.SupportedInitDBTypes()
+	if !slices.Contains(allowed, dbInfo.DBType) {
+		response.FailWithMessage("当前后端未编译该数据库类型: "+dbInfo.DBType+"，请使用与后端一致的 driver_* 构建标签重新编译", c)
+		return
+	}
 	if err := initDBService.InitDB(dbInfo); err != nil {
 		global.IADMIN_LOG.Error("自动创建数据库失败!", zap.Error(err))
 		response.FailWithMessage("自动创建数据库失败，请查看后台日志，检查后在进行初始化", c)
@@ -56,4 +64,9 @@ func (i *DBApi) CheckDB(c *gin.Context) {
 	}
 	global.IADMIN_LOG.Info(message)
 	response.OkWithDetailed(gin.H{"needInit": needInit}, message, c)
+}
+
+// InitSupportedDBTypes 返回当前二进制已编入的数据库初始化类型（与 driver_custom / driver_* 一致）。
+func (i *DBApi) InitSupportedDBTypes(c *gin.Context) {
+	response.OkWithDetailed(gin.H{"dbTypes": initdbcaps.SupportedInitDBTypes()}, "ok", c)
 }

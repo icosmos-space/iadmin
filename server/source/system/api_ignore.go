@@ -52,6 +52,7 @@ func (i *initApiIgnore) InitializeData(ctx context.Context) (context.Context, er
 		{Method: "POST", Path: "/system/reloadSystem"},
 		{Method: "POST", Path: "/base/login"},
 		{Method: "POST", Path: "/base/captcha"},
+		{Method: "GET", Path: "/init/db-types"},
 		{Method: "POST", Path: "/init/initdb"},
 		{Method: "POST", Path: "/init/checkdb"},
 		{Method: "GET", Path: "/info/getInfoDataSource"},

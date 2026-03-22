@@ -63,6 +63,10 @@ image: build
 images: build build-image-web build-image-server
 	docker build -t ${REPOSITORY}/all:${TAGS_OPT} -f deploy/docker/Dockerfile .
 
+# 前端 dist 复制到后端 embed 目录（配合 go build -tags=embedweb）
+copy-web-dist:
+	@rm -rf server/initialize/resource/web/dist/* && mkdir -p server/initialize/resource/web/dist && cp -r web/dist/* server/initialize/resource/web/dist/
+
 #swagger 文档生成
 doc:
 	@cd server && swag init
