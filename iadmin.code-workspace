@@ -24,7 +24,8 @@
     },
     "go.buildTags": "dev",
     "gopls": {
-      "build.buildFlags": ["-tags=dev"]
+      "build.buildFlags": ["-tags=dev"],
+      "directoryFilters": ["-web", "-deploy", "-node_modules"]
     }
   },
   "launch": {
