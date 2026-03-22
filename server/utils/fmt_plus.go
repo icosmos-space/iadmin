@@ -2,10 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"github.com/icosmos-space/iadmin/server/model/common"
 	"math/rand"
 	"reflect"
 	"strings"
+
+	"github.com/icosmos-space/iadmin/server/model/common"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -62,7 +65,7 @@ func MaheHump(s string) string {
 	words := strings.Split(s, "-")
 
 	for i := 1; i < len(words); i++ {
-		words[i] = strings.Title(words[i])
+		words[i] = cases.Title(language.Und, cases.NoLower).String(words[i])
 	}
 
 	return strings.Join(words, "")

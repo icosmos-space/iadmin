@@ -4,7 +4,7 @@
       <div class="w-full md:w-1/2">
         <el-card class="min-w-96">
           <template #header>
-            <el-divider>gin-vue-admin</el-divider>
+            <el-divider>iAdmin</el-divider>
           </template>
           <div>
             <div class="w-full flex items-center justify-center">
@@ -50,7 +50,7 @@
                 <a href="https://github.com/icosmos-space">
                   <img
                     class="org-img dom-center"
-                    src="@/assets/flipped-aurora.png"
+                    src="@/assets/logo.png"
                     alt="icosmos-space"
                   />
                 </a>

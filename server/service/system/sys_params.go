@@ -9,42 +9,42 @@ import (
 type SysParamsService struct{}
 
 // CreateSysParams 创建参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) CreateSysParams(sysParams *system.SysParams) (err error) {
 	err = global.IADMIN_DB.Create(sysParams).Error
 	return err
 }
 
 // DeleteSysParams 删除参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) DeleteSysParams(ID string) (err error) {
 	err = global.IADMIN_DB.Delete(&system.SysParams{}, "id = ?", ID).Error
 	return err
 }
 
 // DeleteSysParamsByIds 批量删除参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) DeleteSysParamsByIds(IDs []string) (err error) {
 	err = global.IADMIN_DB.Delete(&[]system.SysParams{}, "id in ?", IDs).Error
 	return err
 }
 
 // UpdateSysParams 更新参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) UpdateSysParams(sysParams system.SysParams) (err error) {
 	err = global.IADMIN_DB.Model(&system.SysParams{}).Where("id = ?", sysParams.ID).Updates(&sysParams).Error
 	return err
 }
 
 // GetSysParams 根据ID获取参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) GetSysParams(ID string) (sysParams system.SysParams, err error) {
 	err = global.IADMIN_DB.Where("id = ?", ID).First(&sysParams).Error
 	return
 }
 
 // GetSysParamsInfoList 分页获取参数记录
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) GetSysParamsInfoList(info systemReq.SysParamsSearch) (list []system.SysParams, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -75,7 +75,7 @@ func (sysParamsService *SysParamsService) GetSysParamsInfoList(info systemReq.Sy
 }
 
 // GetSysParam 根据key获取参数value
-// Author [Mr.奇淼](https://github.com/pixelmaxQm)
+// Author [icosmos-space](https://github.com/icosmos-space)
 func (sysParamsService *SysParamsService) GetSysParam(key string) (param system.SysParams, err error) {
 	err = global.IADMIN_DB.Where(system.SysParams{Key: key}).First(&param).Error
 	return

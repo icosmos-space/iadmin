@@ -2,10 +2,11 @@ package system
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 	sysModel "github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/service/system"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -59,8 +60,8 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			UUID:        uuid.New(),
 			Username:    "admin",
 			Password:    adminPassword,
-			NickName:    "Mr.奇淼",
-			HeaderImg:   "https://qmplusimg.henrongyi.top/gva_header.jpg",
+			NickName:    "icosmos-space",
+			HeaderImg:   "https://avatars.githubusercontent.com/u/5282810?v=4&size=64",
 			AuthorityId: 888,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
@@ -70,7 +71,7 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			Username:    "a303176530",
 			Password:    password,
 			NickName:    "用户1",
-			HeaderImg:   "https://qmplusimg.henrongyi.top/1572075907logo.png",
+			HeaderImg:   "https://avatars.githubusercontent.com/u/5282810?v=4&size=64",
 			AuthorityId: 9528,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com"},

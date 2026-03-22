@@ -1,9 +1,9 @@
 package initialize
 
 import (
+	"github.com/gin-gonic/gin"
 	_ "github.com/icosmos-space/iadmin/server/plugin"
 	"github.com/icosmos-space/iadmin/server/utils/plugin/v2"
-	"github.com/gin-gonic/gin"
 )
 
 func PluginInitV2(group *gin.Engine, plugins ...plugin.Plugin) {

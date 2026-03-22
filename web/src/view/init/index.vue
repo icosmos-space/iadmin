@@ -16,7 +16,7 @@
           <div
             class="font-sans text-4xl font-bold text-center mb-4 dark:text-white"
           >
-            GIN-VUE-ADMIN
+            iAdmin
           </div>
           <p class="text-gray-600 dark:text-gray-300 mb-2">初始化须知</p>
           <p class="text-gray-600 dark:text-gray-300 mb-2">
@@ -142,7 +142,11 @@
   defineOptions({
     name: 'Init'
   })
-
+  const appName = 'icosmos-space-iadmin'
+  const defaultAdminPassword = '123456'
+  const defaultPassword = '123456'
+  const defaultUserName = 'root'
+  const defaultHost = '127.0.0.1'
   const router = useRouter()
 
   const page = reactive({
@@ -164,91 +168,82 @@
   const out = ref(false)
 
   const form = reactive({
-    adminPassword: '123456',
-    dbType: 'mysql',
-    host: '127.0.0.1',
-    port: '3306',
-    userName: 'root',
-    password: '',
-    dbName: 'gva',
-    dbPath: ''
+    adminPassword: defaultAdminPassword,
+          dbType: 'sqlite',
+          host: '',
+          port: '',
+          userName: '',
+          password: '',
+          dbName: appName,
+          dbPath: ''
   })
 
   const changeDB = (val) => {
     switch (val) {
       case 'mysql':
         Object.assign(form, {
-          adminPassword: '123456',
+          adminPassword: defaultAdminPassword,
           reAdminPassword: '',
           dbType: 'mysql',
-          host: '127.0.0.1',
+          host: defaultHost,
           port: '3306',
-          userName: 'root',
+          userName: defaultUserName,
           password: '',
-          dbName: 'gva',
+          dbName: appName,
           dbPath: ''
         })
         break
       case 'pgsql':
         Object.assign(form, {
-          adminPassword: '123456',
+          adminPassword: defaultAdminPassword,
           dbType: 'pgsql',
-          host: '127.0.0.1',
+          host: defaultHost,
           port: '5432',
           userName: 'postgres',
           password: '',
-          dbName: 'gva',
+          dbName: appName,
           dbPath: '',
           template: 'template0'
         })
         break
       case 'oracle':
         Object.assign(form, {
-          adminPassword: '123456',
+          adminPassword: defaultAdminPassword,
           dbType: 'oracle',
-          host: '127.0.0.1',
+          host: defaultHost,
           port: '1521',
           userName: 'oracle',
           password: '',
-          dbName: 'gva',
+          dbName: appName,
           dbPath: ''
         })
         break
       case 'mssql':
         Object.assign(form, {
-          adminPassword: '123456',
+          adminPassword: defaultAdminPassword,
           dbType: 'mssql',
-          host: '127.0.0.1',
+          host: defaultHost,
           port: '1433',
           userName: 'mssql',
           password: '',
-          dbName: 'gva',
+          dbName: appName,
           dbPath: ''
         })
         break
       case 'sqlite':
         Object.assign(form, {
-          adminPassword: '123456',
+          adminPassword: defaultAdminPassword,
           dbType: 'sqlite',
           host: '',
           port: '',
           userName: '',
           password: '',
-          dbName: 'gva',
+          dbName: appName,
           dbPath: ''
         })
         break
       default:
-        Object.assign(form, {
-          adminPassword: '123456',
-          dbType: 'mysql',
-          host: '127.0.0.1',
-          port: '3306',
-          userName: 'root',
-          password: '',
-          dbName: 'gva',
-          dbPath: ''
-        })
+        Object.assign(form, form)
     }
   }
   const onSubmit = async () => {

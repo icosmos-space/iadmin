@@ -2,16 +2,20 @@ package autocode
 
 import (
 	"fmt"
-	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 	"slices"
 	"strings"
 	"text/template"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 )
 
 // GetTemplateFuncMap 返回模板函数映射，用于在模板中使用
 func GetTemplateFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"title":                    strings.Title,
+		"title":                    cases.Title(language.Und, cases.NoLower).String,
 		"GenerateField":            GenerateField,
 		"GenerateSearchField":      GenerateSearchField,
 		"GenerateSearchConditions": GenerateSearchConditions,

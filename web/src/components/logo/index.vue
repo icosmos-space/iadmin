@@ -55,7 +55,7 @@ watchEffect(async () => {
 });
 
 // 直接用 16px 作为默认的基准大小
-const SPACING = 16
+const SPACING = 24
 function getSize() {
   return {
     width: `${props.size * SPACING}px`,
