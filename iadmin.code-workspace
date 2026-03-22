@@ -9,6 +9,10 @@
       "name": "frontend"
     },
     {
+      "path": "deploy",
+      "name": "deploy"
+    },
+    {
       "path": ".",
       "name": "root"
     }
