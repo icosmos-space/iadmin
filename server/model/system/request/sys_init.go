@@ -2,8 +2,9 @@ package request
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/icosmos-space/iadmin/server/config"
-	"os"
 )
 
 type InitDB struct {
@@ -44,9 +45,9 @@ func (i *InitDB) PgsqlEmptyDsn() string {
 
 // SqliteEmptyDsn sqlite 空数据库 建库链接
 // Author Kafumio
+// 须与 config.Sqlite.Dsn 一致：DBPath 为空时不可拼成 "\xxx.db"（Windows 下会落到当前盘根目录）。
 func (i *InitDB) SqliteEmptyDsn() string {
-	separator := string(os.PathSeparator)
-	return i.DBPath + separator + i.DBName + ".db"
+	return filepath.Join(i.DBPath, i.DBName+".db")
 }
 
 func (i *InitDB) MssqlEmptyDsn() string {
