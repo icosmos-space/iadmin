@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/gin-gonic/gin"
+	"github.com/icosmos-space/iadmin/server/model/common/response"
 )
 
 func JWTAuth() gin.HandlerFunc {
@@ -54,14 +54,14 @@ func JWTAuth() gin.HandlerFunc {
 		//}
 		c.Set("claims", claims)
 		if claims.ExpiresAt.Unix()-time.Now().Unix() < claims.BufferTime {
-			dr, _ := utils.ParseDuration(global.GVA_CONFIG.JWT.ExpiresTime)
+			dr, _ := utils.ParseDuration(global.IADMIN_CONFIG.JWT.ExpiresTime)
 			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(dr))
 			newToken, _ := j.CreateTokenByOldToken(token, *claims)
 			newClaims, _ := j.ParseToken(newToken)
 			c.Header("new-token", newToken)
 			c.Header("new-expires-at", strconv.FormatInt(newClaims.ExpiresAt.Unix(), 10))
 			utils.SetToken(c, newToken, int(dr.Seconds()/60))
-			if global.GVA_CONFIG.System.UseMultipoint {
+			if global.IADMIN_CONFIG.System.UseMultipoint {
 				// 记录新的活跃jwt
 				_ = utils.SetRedisJWT(newToken, newClaims.Username)
 			}

@@ -56,14 +56,14 @@ func (m *Minio) UploadFile(file *multipart.FileHeader) (filePathres, key string,
 	f, openError := file.Open()
 	// mutipart.File to os.File
 	if openError != nil {
-		global.GVA_LOG.Error("function file.Open() Failed", zap.Any("err", openError.Error()))
+		global.IADMIN_LOG.Error("function file.Open() Failed", zap.Any("err", openError.Error()))
 		return "", "", errors.New("function file.Open() Failed, err:" + openError.Error())
 	}
 
 	filecontent := bytes.Buffer{}
 	_, err := io.Copy(&filecontent, f)
 	if err != nil {
-		global.GVA_LOG.Error("读取文件失败", zap.Any("err", err.Error()))
+		global.IADMIN_LOG.Error("读取文件失败", zap.Any("err", err.Error()))
 		return "", "", errors.New("读取文件失败, err:" + err.Error())
 	}
 	f.Close() // 创建文件 defer 关闭
@@ -71,10 +71,10 @@ func (m *Minio) UploadFile(file *multipart.FileHeader) (filePathres, key string,
 	// 对文件名进行加密存储
 	ext := filepath.Ext(file.Filename)
 	filename := utils.MD5V([]byte(strings.TrimSuffix(file.Filename, ext))) + ext
-	if global.GVA_CONFIG.Minio.BasePath == "" {
+	if global.IADMIN_CONFIG.Minio.BasePath == "" {
 		filePathres = "uploads" + "/" + time.Now().Format("2006-01-02") + "/" + filename
 	} else {
-		filePathres = global.GVA_CONFIG.Minio.BasePath + "/" + time.Now().Format("2006-01-02") + "/" + filename
+		filePathres = global.IADMIN_CONFIG.Minio.BasePath + "/" + time.Now().Format("2006-01-02") + "/" + filename
 	}
 
 	// 根据文件扩展名检测 MIME 类型
@@ -88,12 +88,12 @@ func (m *Minio) UploadFile(file *multipart.FileHeader) (filePathres, key string,
 	defer cancel()
 
 	// Upload the file with PutObject   大文件自动切换为分片上传
-	info, err := m.Client.PutObject(ctx, global.GVA_CONFIG.Minio.BucketName, filePathres, &filecontent, file.Size, minio.PutObjectOptions{ContentType: contentType})
+	info, err := m.Client.PutObject(ctx, global.IADMIN_CONFIG.Minio.BucketName, filePathres, &filecontent, file.Size, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
-		global.GVA_LOG.Error("上传文件到minio失败", zap.Any("err", err.Error()))
+		global.IADMIN_LOG.Error("上传文件到minio失败", zap.Any("err", err.Error()))
 		return "", "", errors.New("上传文件到minio失败, err:" + err.Error())
 	}
-	return global.GVA_CONFIG.Minio.BucketUrl + "/" + info.Key, filePathres, nil
+	return global.IADMIN_CONFIG.Minio.BucketUrl + "/" + info.Key, filePathres, nil
 }
 
 func (m *Minio) DeleteFile(key string) error {

@@ -3,6 +3,10 @@ package internal
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/service"
@@ -10,9 +14,6 @@ import (
 	"github.com/icosmos-space/iadmin/server/utils/stacktrace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
-	"strings"
-	"time"
 )
 
 type ZapCore struct {
@@ -26,19 +27,19 @@ func NewZapCore(level zapcore.Level) *ZapCore {
 	levelEnabler := zap.LevelEnablerFunc(func(l zapcore.Level) bool {
 		return l == level
 	})
-	entity.Core = zapcore.NewCore(global.GVA_CONFIG.Zap.Encoder(), syncer, levelEnabler)
+	entity.Core = zapcore.NewCore(global.IADMIN_CONFIG.Zap.Encoder(), syncer, levelEnabler)
 	return entity
 }
 
 func (z *ZapCore) WriteSyncer(formats ...string) zapcore.WriteSyncer {
 	cutter := NewCutter(
-		global.GVA_CONFIG.Zap.Director,
+		global.IADMIN_CONFIG.Zap.Director,
 		z.level.String(),
-		global.GVA_CONFIG.Zap.RetentionDay,
+		global.IADMIN_CONFIG.Zap.RetentionDay,
 		CutterWithLayout(time.DateOnly),
 		CutterWithFormats(formats...),
 	)
-	if global.GVA_CONFIG.Zap.LogInConsole {
+	if global.IADMIN_CONFIG.Zap.LogInConsole {
 		multiSyncer := zapcore.NewMultiWriteSyncer(os.Stdout, cutter)
 		return zapcore.AddSync(multiSyncer)
 	}
@@ -64,7 +65,7 @@ func (z *ZapCore) Write(entry zapcore.Entry, fields []zapcore.Field) error {
 	for i := 0; i < len(fields); i++ {
 		if fields[i].Key == "business" || fields[i].Key == "folder" || fields[i].Key == "directory" {
 			syncer := z.WriteSyncer(fields[i].String)
-			z.Core = zapcore.NewCore(global.GVA_CONFIG.Zap.Encoder(), syncer, z.level)
+			z.Core = zapcore.NewCore(global.IADMIN_CONFIG.Zap.Encoder(), syncer, z.level)
 		}
 	}
 	// 先写入原日志目标

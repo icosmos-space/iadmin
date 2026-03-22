@@ -3,27 +3,27 @@ kind: Deployment
 metadata:
   name: gva-web
   annotations:
-    flipped-aurora/gin-vue-admin: ui
-    github: "https://github.com/flipped-aurora/gin-vue-admin.git"
+    icosmos-space/iadmin: ui
+    github: "https://github.com/icosmos-space/iadmin.git"
     app.kubernetes.io/version: 0.0.1
   labels:
-    app: gva-web
-    version: gva-vue3
+    app: iadmin-web
+    version: iadmin-vue3
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gva-web
-      version: gva-vue3
+      app: iadmin-web
+      version: iadmin-vue3
   template:
     metadata:
       labels:
-        app: gva-web
-        version: gva-vue3
+        app: iadmin-web
+        version: iadmin-vue3
     spec:
       containers:
-        - name: gin-vue-admin-nginx-container
-          image: registry.cn-hangzhou.aliyuncs.com/gva/web:latest
+        - name: iadmin-nginx-container
+          image: registry.cn-hangzhou.aliyuncs.com/icosmos-space/iadmin/web:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"fmt"
+
 	"github.com/icosmos-space/iadmin/server/task"
 
 	"github.com/robfig/cron/v3"
@@ -14,8 +15,8 @@ func Timer() {
 		var option []cron.Option
 		option = append(option, cron.WithSeconds())
 		// 清理DB定时任务
-		_, err := global.GVA_Timer.AddTaskByFunc("ClearDB", "@daily", func() {
-			err := task.ClearTable(global.GVA_DB) // 定时任务方法定在task文件包中
+		_, err := global.IADMIN_Timer.AddTaskByFunc("ClearDB", "@daily", func() {
+			err := task.ClearTable(global.IADMIN_DB) // 定时任务方法定在task文件包中
 			if err != nil {
 				fmt.Println("timer error:", err)
 			}

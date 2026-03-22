@@ -520,7 +520,7 @@ func (s *SkillsService) toolSkillsDir(tool string) (string, error) {
 	if !ok {
 		return "", errors.New("工具类型不支持")
 	}
-	root := strings.TrimSpace(global.GVA_CONFIG.AutoCode.Root)
+	root := strings.TrimSpace(global.IADMIN_CONFIG.AutoCode.Root)
 	if root == "" {
 		root = "."
 	}

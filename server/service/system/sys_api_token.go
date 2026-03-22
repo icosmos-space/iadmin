@@ -2,19 +2,20 @@ package system
 
 import (
 	"errors"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	sysReq "github.com/icosmos-space/iadmin/server/model/system/request"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/golang-jwt/jwt/v5"
-	"time"
 )
 
 type ApiTokenService struct{}
 
 func (apiVersion *ApiTokenService) CreateApiToken(apiToken system.SysApiToken, days int) (string, error) {
 	var user system.SysUser
-	if err := global.GVA_DB.Where("id = ?", apiToken.UserID).First(&user).Error; err != nil {
+	if err := global.IADMIN_DB.Where("id = ?", apiToken.UserID).First(&user).Error; err != nil {
 		return "", errors.New("用户不存在")
 	}
 
@@ -29,14 +30,14 @@ func (apiVersion *ApiTokenService) CreateApiToken(apiToken system.SysApiToken, d
 		return "", errors.New("用户不具备该角色权限")
 	}
 
-	j := &utils.JWT{SigningKey: []byte(global.GVA_CONFIG.JWT.SigningKey)} // 唯一不同的部分是过期时间
+	j := &utils.JWT{SigningKey: []byte(global.IADMIN_CONFIG.JWT.SigningKey)} // 唯一不同的部分是过期时间
 
 	expireTime := time.Duration(days) * 24 * time.Hour
 	if days == -1 {
 		expireTime = 100 * 365 * 24 * time.Hour
 	}
 
-	bf, _ := utils.ParseDuration(global.GVA_CONFIG.JWT.BufferTime)
+	bf, _ := utils.ParseDuration(global.IADMIN_CONFIG.JWT.BufferTime)
 
 	claims := sysReq.CustomClaims{
 		BaseClaims: sysReq.BaseClaims{
@@ -51,7 +52,7 @@ func (apiVersion *ApiTokenService) CreateApiToken(apiToken system.SysApiToken, d
 			Audience:  jwt.ClaimStrings{"GVA"},
 			NotBefore: jwt.NewNumericDate(time.Now().Add(-1000)),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireTime)),
-			Issuer:    global.GVA_CONFIG.JWT.Issuer,
+			Issuer:    global.IADMIN_CONFIG.JWT.Issuer,
 		},
 	}
 
@@ -63,14 +64,14 @@ func (apiVersion *ApiTokenService) CreateApiToken(apiToken system.SysApiToken, d
 	apiToken.Token = token
 	apiToken.Status = true
 	apiToken.ExpiresAt = time.Now().Add(expireTime)
-	err = global.GVA_DB.Create(&apiToken).Error
+	err = global.IADMIN_DB.Create(&apiToken).Error
 	return token, err
 }
 
 func (apiVersion *ApiTokenService) GetApiTokenList(info sysReq.SysApiTokenSearch) (list []system.SysApiToken, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&system.SysApiToken{})
+	db := global.IADMIN_DB.Model(&system.SysApiToken{})
 
 	db = db.Preload("User")
 
@@ -91,7 +92,7 @@ func (apiVersion *ApiTokenService) GetApiTokenList(info sysReq.SysApiTokenSearch
 
 func (apiVersion *ApiTokenService) DeleteApiToken(id uint) error {
 	var apiToken system.SysApiToken
-	err := global.GVA_DB.First(&apiToken, id).Error
+	err := global.IADMIN_DB.First(&apiToken, id).Error
 	if err != nil {
 		return err
 	}
@@ -102,5 +103,5 @@ func (apiVersion *ApiTokenService) DeleteApiToken(id uint) error {
 		return err
 	}
 
-	return global.GVA_DB.Model(&apiToken).Update("status", false).Error
+	return global.IADMIN_DB.Model(&apiToken).Update("status", false).Error
 }

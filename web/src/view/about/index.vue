@@ -8,33 +8,33 @@
           </template>
           <div>
             <div class="w-full flex items-center justify-center">
-              <a href="https://github.com/flipped-aurora/gin-vue-admin">
+              <a href="https://github.com/icosmos-space/iadmin">
                   <img
                     class="org-img dom-center"
                     src="@/assets/logo.png"
-                    alt="gin-vue-admin"
+                    alt="iAdmin"
                   />
                 </a>
             </div>
             <div class="w-full flex items-center justify-around">
-              <a href="https://github.com/flipped-aurora/gin-vue-admin">
+              <a href="https://github.com/icosmos-space/iadmin">
                   <img
                     class="dom-center"
-                    src="https://img.shields.io/github/watchers/flipped-aurora/gin-vue-admin.svg?label=Watch"
+                    src="https://img.shields.io/github/watchers/icosmos-space/iadmin.svg?label=Watch"
                     alt=""
                   />
                 </a>
-                <a href="https://github.com/flipped-aurora/gin-vue-admin">
+                <a href="https://github.com/icosmos-space/iadmin">
                   <img
                     class="dom-center"
-                    src="https://img.shields.io/github/stars/flipped-aurora/gin-vue-admin.svg?style=social"
+                    src="https://img.shields.io/github/stars/icosmos-space/iadmin.svg?style=social"
                     alt=""
                   />
                 </a>
-                <a href="https://github.com/flipped-aurora/gin-vue-admin">
+                <a href="https://github.com/icosmos-space/iadmin">
                   <img
                     class="dom-center"
-                    src="https://img.shields.io/github/forks/flipped-aurora/gin-vue-admin.svg?label=Fork"
+                    src="https://img.shields.io/github/forks/icosmos-space/iadmin.svg?label=Fork"
                     alt=""
                   />
                 </a>
@@ -43,15 +43,15 @@
         </el-card>
         <el-card class="min-w-96 mt-5">
           <template #header>
-            <div>flipped-aurora团队</div>
+            <div>icosmos-space团队</div>
           </template>
           <div>
             <div class="w-full flex items-center justify-center">
-                <a href="https://github.com/flipped-aurora">
+                <a href="https://github.com/icosmos-space">
                   <img
                     class="org-img dom-center"
                     src="@/assets/flipped-aurora.png"
-                    alt="flipped-aurora"
+                    alt="icosmos-space"
                   />
                 </a>
               </div>

@@ -1,12 +1,13 @@
 package middleware
 
 import (
+	"strconv"
+	"strings"
+
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/gin-gonic/gin"
-	"strconv"
-	"strings"
 )
 
 // CasbinHandler 拦截器
@@ -15,7 +16,7 @@ func CasbinHandler() gin.HandlerFunc {
 		waitUse, _ := utils.GetClaims(c)
 		//获取请求的PATH
 		path := c.Request.URL.Path
-		obj := strings.TrimPrefix(path, global.GVA_CONFIG.System.RouterPrefix)
+		obj := strings.TrimPrefix(path, global.IADMIN_CONFIG.System.RouterPrefix)
 		// 获取请求方法
 		act := c.Request.Method
 		// 获取用户的角色

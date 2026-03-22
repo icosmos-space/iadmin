@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPluginInitializeRouter_Injection(t *testing.T) {
@@ -27,7 +28,7 @@ func TestPluginInitializeRouter_Injection(t *testing.T) {
 			name: "测试 Gva插件User 注入",
 			fields: fields{
 				Type:                 TypePluginInitializeRouter,
-				Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
+				Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
 				ImportPath:           `"github.com/icosmos-space/iadmin/server/plugin/gva/router"`,
 				AppName:              "Router",
 				GroupName:            "User",
@@ -42,7 +43,7 @@ func TestPluginInitializeRouter_Injection(t *testing.T) {
 			name: "测试 中文 注入",
 			fields: fields{
 				Type:                 TypePluginInitializeRouter,
-				Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
+				Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
 				ImportPath:           `"github.com/icosmos-space/iadmin/server/plugin/gva/router"`,
 				AppName:              "Router",
 				GroupName:            "U中文",
@@ -101,7 +102,7 @@ func TestPluginInitializeRouter_Rollback(t *testing.T) {
 			name: "测试 Gva插件User 回滚",
 			fields: fields{
 				Type:                 TypePluginInitializeRouter,
-				Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
+				Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
 				ImportPath:           `"github.com/icosmos-space/iadmin/server/plugin/gva/router"`,
 				AppName:              "Router",
 				GroupName:            "User",
@@ -116,7 +117,7 @@ func TestPluginInitializeRouter_Rollback(t *testing.T) {
 			name: "测试 中文 注入",
 			fields: fields{
 				Type:                 TypePluginInitializeRouter,
-				Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
+				Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "initialize", "router.go"),
 				ImportPath:           `"github.com/icosmos-space/iadmin/server/plugin/gva/router"`,
 				AppName:              "Router",
 				GroupName:            "U中文",

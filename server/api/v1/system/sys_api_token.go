@@ -1,11 +1,11 @@
 package system
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	sysReq "github.com/icosmos-space/iadmin/server/model/system/request"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +33,7 @@ func (s *ApiTokenApi) CreateApiToken(c *gin.Context) {
 
 	jwtStr, err := apiTokenService.CreateApiToken(token, req.Days)
 	if err != nil {
-		global.GVA_LOG.Error("签发失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("签发失败!", zap.Error(err))
 		response.FailWithMessage("签发失败: "+err.Error(), c)
 		return
 	}
@@ -51,7 +51,7 @@ func (s *ApiTokenApi) GetApiTokenList(c *gin.Context) {
 	}
 	list, total, err := apiTokenService.GetApiTokenList(pageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -73,7 +73,7 @@ func (s *ApiTokenApi) DeleteApiToken(c *gin.Context) {
 	}
 	err = apiTokenService.DeleteApiToken(req.ID)
 	if err != nil {
-		global.GVA_LOG.Error("作废失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("作废失败!", zap.Error(err))
 		response.FailWithMessage("作废失败", c)
 		return
 	}

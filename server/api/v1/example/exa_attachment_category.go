@@ -1,11 +1,11 @@
 package example
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	common "github.com/icosmos-space/iadmin/server/model/common/request"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/example"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +21,7 @@ type AttachmentCategoryApi struct{}
 func (a *AttachmentCategoryApi) GetCategoryList(c *gin.Context) {
 	res, err := attachmentCategoryService.GetCategoryList()
 	if err != nil {
-		global.GVA_LOG.Error("获取分类列表失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取分类列表失败!", zap.Error(err))
 		response.FailWithMessage("获取分类列表失败", c)
 		return
 	}
@@ -39,13 +39,13 @@ func (a *AttachmentCategoryApi) GetCategoryList(c *gin.Context) {
 func (a *AttachmentCategoryApi) AddCategory(c *gin.Context) {
 	var req example.ExaAttachmentCategory
 	if err := c.ShouldBindJSON(&req); err != nil {
-		global.GVA_LOG.Error("参数错误!", zap.Error(err))
+		global.IADMIN_LOG.Error("参数错误!", zap.Error(err))
 		response.FailWithMessage("参数错误", c)
 		return
 	}
 
 	if err := attachmentCategoryService.AddCategory(&req); err != nil {
-		global.GVA_LOG.Error("创建/更新失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建/更新失败!", zap.Error(err))
 		response.FailWithMessage("创建/更新失败："+err.Error(), c)
 		return
 	}

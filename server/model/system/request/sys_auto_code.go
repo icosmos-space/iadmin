@@ -3,11 +3,12 @@ package request
 import (
 	"encoding/json"
 	"fmt"
+	"go/token"
+	"strings"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	model "github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/pkg/errors"
-	"go/token"
-	"strings"
 )
 
 type AutoCode struct {
@@ -118,7 +119,7 @@ func (r *AutoCode) Menu(template string) model.SysBaseMenu {
 // Pretreatment 预处理
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (r *AutoCode) Pretreatment() error {
-	r.Module = global.GVA_CONFIG.AutoCode.Module
+	r.Module = global.IADMIN_CONFIG.AutoCode.Module
 	if token.IsKeyword(r.Abbreviation) {
 		r.Abbreviation = r.Abbreviation + "_"
 	} // go 关键字处理

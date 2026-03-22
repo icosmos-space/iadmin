@@ -19,11 +19,11 @@ func init() {
 
 // MenuListResponse 菜单列表响应结构
 type MenuListResponse struct {
-	Success     bool                  `json:"success"`
-	Message     string                `json:"message"`
-	Menus       []system.SysBaseMenu  `json:"menus"`
-	TotalCount  int                   `json:"totalCount"`
-	Description string                `json:"description"`
+	Success     bool                 `json:"success"`
+	Message     string               `json:"message"`
+	Menus       []system.SysBaseMenu `json:"menus"`
+	TotalCount  int                  `json:"totalCount"`
+	Description string               `json:"description"`
 }
 
 // MenuLister 菜单列表工具
@@ -46,9 +46,9 @@ func (m *MenuLister) New() mcp.Tool {
 - 菜单权限管理：了解系统中所有可用的菜单项
 - 导航组件开发：构建动态导航菜单
 - 系统架构分析：了解系统的菜单结构和页面组织`),
-mcp.WithString("_placeholder",
+		mcp.WithString("_placeholder",
 			mcp.Description("占位符，防止json schema校验失败"),
-		),	
+		),
 	)
 }
 
@@ -57,7 +57,7 @@ func (m *MenuLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.Call
 	// 获取所有基础菜单
 	allMenus, err := m.getAllMenus()
 	if err != nil {
-		global.GVA_LOG.Error("获取菜单列表失败", zap.Error(err))
+		global.IADMIN_LOG.Error("获取菜单列表失败", zap.Error(err))
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.TextContent{
@@ -81,7 +81,7 @@ func (m *MenuLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.Call
 	// 序列化响应
 	responseJSON, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
-		global.GVA_LOG.Error("序列化菜单响应失败", zap.Error(err))
+		global.IADMIN_LOG.Error("序列化菜单响应失败", zap.Error(err))
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.TextContent{
@@ -106,10 +106,9 @@ func (m *MenuLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.Call
 // getAllMenus 获取所有基础菜单
 func (m *MenuLister) getAllMenus() ([]system.SysBaseMenu, error) {
 	var menus []system.SysBaseMenu
-	err := global.GVA_DB.Order("sort").Preload("Parameters").Preload("MenuBtn").Find(&menus).Error
+	err := global.IADMIN_DB.Order("sort").Preload("Parameters").Preload("MenuBtn").Find(&menus).Error
 	if err != nil {
 		return nil, err
 	}
 	return menus, nil
 }
-

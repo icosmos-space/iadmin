@@ -10,7 +10,7 @@ import (
 
 // GormOracle 初始化oracle数据库
 func GormOracle() *gorm.DB {
-	m := global.GVA_CONFIG.Oracle
+	m := global.IADMIN_CONFIG.Oracle
 	return initOracleDatabase(m)
 }
 

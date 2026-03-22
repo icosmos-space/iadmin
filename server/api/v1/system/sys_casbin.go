@@ -1,12 +1,12 @@
 package system
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	systemRes "github.com/icosmos-space/iadmin/server/model/system/response"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +36,7 @@ func (cas *CasbinApi) UpdateCasbin(c *gin.Context) {
 	adminAuthorityID := utils.GetUserAuthorityId(c)
 	err = casbinService.UpdateCasbin(adminAuthorityID, cmr.AuthorityId, cmr.CasbinInfos)
 	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 		return
 	}

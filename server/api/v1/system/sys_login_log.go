@@ -1,12 +1,12 @@
 package system
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/request"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +21,7 @@ func (s *LoginLogApi) DeleteLoginLog(c *gin.Context) {
 	}
 	err = loginLogService.DeleteLoginLog(loginLog)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -37,7 +37,7 @@ func (s *LoginLogApi) DeleteLoginLogByIds(c *gin.Context) {
 	}
 	err = loginLogService.DeleteLoginLogByIds(SDS)
 	if err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 		return
 	}
@@ -53,7 +53,7 @@ func (s *LoginLogApi) FindLoginLog(c *gin.Context) {
 	}
 	reLoginLog, err := loginLogService.GetLoginLog(loginLog.ID)
 	if err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 		return
 	}
@@ -69,7 +69,7 @@ func (s *LoginLogApi) GetLoginLogList(c *gin.Context) {
 	}
 	list, total, err := loginLogService.GetLoginLogInfoList(pageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}

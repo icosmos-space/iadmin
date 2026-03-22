@@ -1,11 +1,11 @@
 package system
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -29,7 +29,7 @@ func (s *DictionaryApi) CreateSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.CreateSysDictionary(dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 		return
 	}
@@ -54,7 +54,7 @@ func (s *DictionaryApi) DeleteSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.DeleteSysDictionary(dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -79,7 +79,7 @@ func (s *DictionaryApi) UpdateSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.UpdateSysDictionary(&dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 		return
 	}
@@ -104,7 +104,7 @@ func (s *DictionaryApi) FindSysDictionary(c *gin.Context) {
 	}
 	sysDictionary, err := dictionaryService.GetSysDictionary(dictionary.Type, dictionary.ID, dictionary.Status)
 	if err != nil {
-		global.GVA_LOG.Error("字典未创建或未开启!", zap.Error(err))
+		global.IADMIN_LOG.Error("字典未创建或未开启!", zap.Error(err))
 		response.FailWithMessage("字典未创建或未开启", c)
 		return
 	}
@@ -129,7 +129,7 @@ func (s *DictionaryApi) GetSysDictionaryList(c *gin.Context) {
 	}
 	list, err := dictionaryService.GetSysDictionaryInfoList(c, dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -158,7 +158,7 @@ func (s *DictionaryApi) ExportSysDictionary(c *gin.Context) {
 	}
 	exportData, err := dictionaryService.ExportSysDictionary(dictionary.ID)
 	if err != nil {
-		global.GVA_LOG.Error("导出失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("导出失败!", zap.Error(err))
 		response.FailWithMessage("导出失败", c)
 		return
 	}
@@ -183,7 +183,7 @@ func (s *DictionaryApi) ImportSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.ImportSysDictionary(req.Json)
 	if err != nil {
-		global.GVA_LOG.Error("导入失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("导入失败!", zap.Error(err))
 		response.FailWithMessage("导入失败: "+err.Error(), c)
 		return
 	}

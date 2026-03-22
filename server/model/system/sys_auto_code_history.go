@@ -1,12 +1,13 @@
 package system
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
-	"gorm.io/gorm"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/icosmos-space/iadmin/server/global"
+	"gorm.io/gorm"
 )
 
 // SysAutoCodeHistory 自动迁移代码记录,用于回滚,重放使用
@@ -32,7 +33,7 @@ type SysAutoCodeHistory struct {
 func (s *SysAutoCodeHistory) BeforeCreate(db *gorm.DB) error {
 	templates := make(map[string]string, len(s.Templates))
 	for key, value := range s.Templates {
-		server := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server)
+		server := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server)
 		{
 			hasServer := strings.Index(key, server)
 			if hasServer != -1 {
@@ -41,7 +42,7 @@ func (s *SysAutoCodeHistory) BeforeCreate(db *gorm.DB) error {
 				key = path.Join(keys...)
 			}
 		} // key
-		web := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot())
+		web := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot())
 		hasWeb := strings.Index(value, web)
 		if hasWeb != -1 {
 			value = strings.TrimPrefix(value, web)

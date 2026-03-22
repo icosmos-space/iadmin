@@ -128,7 +128,7 @@ func (a *ApiCreator) Handle(ctx context.Context, request mcp.CallToolRequest) (*
 
 		err := apiService.CreateApi(api)
 		if err != nil {
-			global.GVA_LOG.Warn("创建API失败",
+			global.IADMIN_LOG.Warn("创建API失败",
 				zap.String("path", apiReq.Path),
 				zap.String("method", apiReq.Method),
 				zap.Error(err))
@@ -142,9 +142,9 @@ func (a *ApiCreator) Handle(ctx context.Context, request mcp.CallToolRequest) (*
 		} else {
 			// 获取创建的API ID
 			var createdApi system.SysApi
-			err = global.GVA_DB.Where("path = ? AND method = ?", apiReq.Path, apiReq.Method).First(&createdApi).Error
+			err = global.IADMIN_DB.Where("path = ? AND method = ?", apiReq.Path, apiReq.Method).First(&createdApi).Error
 			if err != nil {
-				global.GVA_LOG.Warn("获取创建的API ID失败", zap.Error(err))
+				global.IADMIN_LOG.Warn("获取创建的API ID失败", zap.Error(err))
 			}
 
 			responses = append(responses, ApiCreateResponse{

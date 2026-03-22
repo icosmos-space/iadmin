@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 	systemRes "github.com/icosmos-space/iadmin/server/model/system/response"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -122,7 +122,7 @@ func (sysVersionApi *SysVersionApi) DeleteSysVersion(c *gin.Context) {
 	ID := c.Query("ID")
 	err := sysVersionService.DeleteSysVersion(ctx, ID)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败:"+err.Error(), c)
 		return
 	}
@@ -144,7 +144,7 @@ func (sysVersionApi *SysVersionApi) DeleteSysVersionByIds(c *gin.Context) {
 	IDs := c.QueryArray("IDs[]")
 	err := sysVersionService.DeleteSysVersionByIds(ctx, IDs)
 	if err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败:"+err.Error(), c)
 		return
 	}
@@ -167,7 +167,7 @@ func (sysVersionApi *SysVersionApi) FindSysVersion(c *gin.Context) {
 	ID := c.Query("ID")
 	resysVersion, err := sysVersionService.GetSysVersion(ctx, ID)
 	if err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败:"+err.Error(), c)
 		return
 	}
@@ -195,7 +195,7 @@ func (sysVersionApi *SysVersionApi) GetSysVersionList(c *gin.Context) {
 	}
 	list, total, err := sysVersionService.GetSysVersionInfoList(ctx, pageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败:"+err.Error(), c)
 		return
 	}
@@ -250,7 +250,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 	if len(req.MenuIds) > 0 {
 		menuData, err = sysVersionService.GetMenusByIds(ctx, req.MenuIds)
 		if err != nil {
-			global.GVA_LOG.Error("获取菜单数据失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("获取菜单数据失败!", zap.Error(err))
 			response.FailWithMessage("获取菜单数据失败:"+err.Error(), c)
 			return
 		}
@@ -261,7 +261,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 	if len(req.ApiIds) > 0 {
 		apiData, err = sysVersionService.GetApisByIds(ctx, req.ApiIds)
 		if err != nil {
-			global.GVA_LOG.Error("获取API数据失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("获取API数据失败!", zap.Error(err))
 			response.FailWithMessage("获取API数据失败:"+err.Error(), c)
 			return
 		}
@@ -272,7 +272,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 	if len(req.DictIds) > 0 {
 		dictData, err = sysVersionService.GetDictionariesByIds(ctx, req.DictIds)
 		if err != nil {
-			global.GVA_LOG.Error("获取字典数据失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("获取字典数据失败!", zap.Error(err))
 			response.FailWithMessage("获取字典数据失败:"+err.Error(), c)
 			return
 		}
@@ -302,7 +302,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 			Status: dict.Status,
 			Desc:   dict.Desc,
 		}
-		
+
 		// 处理字典详情数据，清除ID和时间戳字段
 		cleanDetails := make([]system.SysDictionaryDetail, 0, len(dict.SysDictionaryDetails))
 		for _, detail := range dict.SysDictionaryDetails {
@@ -317,7 +317,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 			cleanDetails = append(cleanDetails, cleanDetail)
 		}
 		cleanDict.SysDictionaryDetails = cleanDetails
-		
+
 		processedDicts = append(processedDicts, cleanDict)
 	}
 
@@ -337,7 +337,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 	// 转换为JSON
 	jsonData, err := json.MarshalIndent(exportData, "", "  ")
 	if err != nil {
-		global.GVA_LOG.Error("JSON序列化失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("JSON序列化失败!", zap.Error(err))
 		response.FailWithMessage("JSON序列化失败:"+err.Error(), c)
 		return
 	}
@@ -352,7 +352,7 @@ func (sysVersionApi *SysVersionApi) ExportVersion(c *gin.Context) {
 
 	err = sysVersionService.CreateSysVersion(ctx, &version)
 	if err != nil {
-		global.GVA_LOG.Error("保存版本记录失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("保存版本记录失败!", zap.Error(err))
 		response.FailWithMessage("保存版本记录失败:"+err.Error(), c)
 		return
 	}
@@ -381,7 +381,7 @@ func (sysVersionApi *SysVersionApi) DownloadVersionJson(c *gin.Context) {
 	// 获取版本记录
 	version, err := sysVersionService.GetSysVersion(ctx, ID)
 	if err != nil {
-		global.GVA_LOG.Error("获取版本记录失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取版本记录失败!", zap.Error(err))
 		response.FailWithMessage("获取版本记录失败:"+err.Error(), c)
 		return
 	}
@@ -443,7 +443,7 @@ func (sysVersionApi *SysVersionApi) ImportVersion(c *gin.Context) {
 	// 导入菜单数据
 	if len(importData.ExportMenu) > 0 {
 		if err := sysVersionService.ImportMenus(ctx, importData.ExportMenu); err != nil {
-			global.GVA_LOG.Error("导入菜单失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("导入菜单失败!", zap.Error(err))
 			response.FailWithMessage("导入菜单失败: "+err.Error(), c)
 			return
 		}
@@ -452,7 +452,7 @@ func (sysVersionApi *SysVersionApi) ImportVersion(c *gin.Context) {
 	// 导入API数据
 	if len(importData.ExportApi) > 0 {
 		if err := sysVersionService.ImportApis(importData.ExportApi); err != nil {
-			global.GVA_LOG.Error("导入API失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("导入API失败!", zap.Error(err))
 			response.FailWithMessage("导入API失败: "+err.Error(), c)
 			return
 		}
@@ -461,7 +461,7 @@ func (sysVersionApi *SysVersionApi) ImportVersion(c *gin.Context) {
 	// 导入字典数据
 	if len(importData.ExportDictionary) > 0 {
 		if err := sysVersionService.ImportDictionaries(importData.ExportDictionary); err != nil {
-			global.GVA_LOG.Error("导入字典失败!", zap.Error(err))
+			global.IADMIN_LOG.Error("导入字典失败!", zap.Error(err))
 			response.FailWithMessage("导入字典失败: "+err.Error(), c)
 			return
 		}
@@ -478,7 +478,7 @@ func (sysVersionApi *SysVersionApi) ImportVersion(c *gin.Context) {
 
 	err = sysVersionService.CreateSysVersion(ctx, &version)
 	if err != nil {
-		global.GVA_LOG.Error("保存导入记录失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("保存导入记录失败!", zap.Error(err))
 		// 这里不返回错误，因为数据已经导入成功
 	}
 

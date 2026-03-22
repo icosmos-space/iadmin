@@ -54,7 +54,7 @@ func (a *ApiLister) New() mcp.Tool {
 - ginApis: gin路由中的API（仅包含路径和方法），需要AI根据路径自行揣摩路径的业务含义，例如：/api/user/:id 表示根据用户ID获取用户信息`),
 		mcp.WithString("_placeholder",
 			mcp.Description("占位符，防止json schema校验失败"),
-		),	
+		),
 	)
 }
 
@@ -64,7 +64,7 @@ func (a *ApiLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 	// 获取数据库中的API
 	databaseApis, err := a.getDatabaseApis()
 	if err != nil {
-		global.GVA_LOG.Error("获取数据库API失败", zap.Error(err))
+		global.IADMIN_LOG.Error("获取数据库API失败", zap.Error(err))
 		errorResponse := ApiListResponse{
 			Success: false,
 			Message: "获取数据库API失败: " + err.Error(),
@@ -83,7 +83,7 @@ func (a *ApiLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 	// 获取gin路由中的API
 	ginApis, err := a.getGinApis()
 	if err != nil {
-		global.GVA_LOG.Error("获取gin路由API失败", zap.Error(err))
+		global.IADMIN_LOG.Error("获取gin路由API失败", zap.Error(err))
 		errorResponse := ApiListResponse{
 			Success: false,
 			Message: "获取gin路由API失败: " + err.Error(),
@@ -108,7 +108,7 @@ func (a *ApiLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 		TotalCount:   len(databaseApis) + len(ginApis),
 	}
 
-	global.GVA_LOG.Info("API列表获取成功",
+	global.IADMIN_LOG.Info("API列表获取成功",
 		zap.Int("数据库API数量", len(databaseApis)),
 		zap.Int("gin路由API数量", len(ginApis)),
 		zap.Int("总数量", response.TotalCount))
@@ -131,7 +131,7 @@ func (a *ApiLister) Handle(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 // getDatabaseApis 获取数据库中的所有API
 func (a *ApiLister) getDatabaseApis() ([]ApiInfo, error) {
 	var apis []system.SysApi
-	err := global.GVA_DB.Model(&system.SysApi{}).Order("api_group ASC, path ASC").Find(&apis).Error
+	err := global.IADMIN_DB.Model(&system.SysApi{}).Order("api_group ASC, path ASC").Find(&apis).Error
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (a *ApiLister) getDatabaseApis() ([]ApiInfo, error) {
 func (a *ApiLister) getGinApis() ([]ApiInfo, error) {
 	// 从gin路由信息中获取所有API
 	var result []ApiInfo
-	for _, route := range global.GVA_ROUTERS {
+	for _, route := range global.IADMIN_ROUTERS {
 		result = append(result, ApiInfo{
 			Path:   route.Path,
 			Method: route.Method,

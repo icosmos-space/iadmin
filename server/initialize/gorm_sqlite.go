@@ -1,16 +1,16 @@
 package initialize
 
 import (
+	"github.com/glebarez/sqlite"
 	"github.com/icosmos-space/iadmin/server/config"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/initialize/internal"
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 
 // GormSqlite 初始化Sqlite数据库
 func GormSqlite() *gorm.DB {
-	s := global.GVA_CONFIG.Sqlite
+	s := global.IADMIN_CONFIG.Sqlite
 	return initSqliteDatabase(s)
 }
 

@@ -20,7 +20,7 @@ import (
 // @Tag.Name        SysUser
 // @Tag.Description 用户
 
-// @title                       Gin-Vue-Admin Swagger API接口文档
+// @title                       iAdmin Swagger API接口文档
 // @version                     v2.9.0
 // @description                 使用gin+vue进行极速开发的全栈开发基础平台
 // @securityDefinitions.apikey  ApiKeyAuth
@@ -37,15 +37,15 @@ func main() {
 // initializeSystem 初始化系统所有组件
 // 提取为单独函数以便于系统重载时调用
 func initializeSystem() {
-	global.GVA_VP = core.Viper() // 初始化Viper
+	global.IADMIN_VP = core.Viper() // 初始化Viper
 	initialize.OtherInit()
-	global.GVA_LOG = core.Zap() // 初始化zap日志库
-	zap.ReplaceGlobals(global.GVA_LOG)
-	global.GVA_DB = initialize.Gorm() // gorm连接数据库
+	global.IADMIN_LOG = core.Zap() // 初始化zap日志库
+	zap.ReplaceGlobals(global.IADMIN_LOG)
+	global.IADMIN_DB = initialize.Gorm() // gorm连接数据库
 	initialize.Timer()
 	initialize.DBList()
 	initialize.SetupHandlers() // 注册全局函数
-	if global.GVA_DB != nil {
+	if global.IADMIN_DB != nil {
 		initialize.RegisterTables() // 初始化表
 	}
 }

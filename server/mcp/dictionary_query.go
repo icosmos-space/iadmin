@@ -105,7 +105,7 @@ func (d *DictionaryQuery) Handle(ctx context.Context, request mcp.CallToolReques
 
 		sysDictionary, err := dictionaryService.GetSysDictionary(dictType, 0, status)
 		if err != nil {
-			global.GVA_LOG.Error("查询字典失败", zap.Error(err))
+			global.IADMIN_LOG.Error("查询字典失败", zap.Error(err))
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
 					mcp.NewTextContent(fmt.Sprintf(`{"success": false, "message": "查询字典失败: %v", "total": 0, "dictionaries": []}`, err.Error())),
@@ -140,7 +140,7 @@ func (d *DictionaryQuery) Handle(ctx context.Context, request mcp.CallToolReques
 	} else {
 		// 查询所有字典
 		var sysDictionaries []system.SysDictionary
-		db := global.GVA_DB.Model(&system.SysDictionary{})
+		db := global.IADMIN_DB.Model(&system.SysDictionary{})
 
 		if !includeDisabled {
 			db = db.Where("status = ?", true)
@@ -155,7 +155,7 @@ func (d *DictionaryQuery) Handle(ctx context.Context, request mcp.CallToolReques
 		}).Find(&sysDictionaries).Error
 
 		if err != nil {
-			global.GVA_LOG.Error("查询字典列表失败", zap.Error(err))
+			global.IADMIN_LOG.Error("查询字典列表失败", zap.Error(err))
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
 					mcp.NewTextContent(fmt.Sprintf(`{"success": false, "message": "查询字典列表失败: %v", "total": 0, "dictionaries": []}`, err.Error())),
@@ -223,7 +223,7 @@ func (d *DictionaryQuery) Handle(ctx context.Context, request mcp.CallToolReques
 
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		global.GVA_LOG.Error("序列化响应失败", zap.Error(err))
+		global.IADMIN_LOG.Error("序列化响应失败", zap.Error(err))
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.NewTextContent(fmt.Sprintf(`{"success": false, "message": "序列化响应失败: %v", "total": 0, "dictionaries": []}`, err.Error())),

@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPackageEnter_Rollback(t *testing.T) {
@@ -24,7 +25,7 @@ func TestPackageEnter_Rollback(t *testing.T) {
 			name: "测试ExampleApiGroup回滚",
 			fields: fields{
 				Type:              TypePackageApiEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/api/v1/example"`,
 				StructName:        "ExampleApiGroup",
 				PackageName:       "example",
@@ -36,7 +37,7 @@ func TestPackageEnter_Rollback(t *testing.T) {
 			name: "测试ExampleRouterGroup回滚",
 			fields: fields{
 				Type:              TypePackageRouterEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "router", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "router", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/router/example"`,
 				StructName:        "Example",
 				PackageName:       "example",
@@ -48,7 +49,7 @@ func TestPackageEnter_Rollback(t *testing.T) {
 			name: "测试ExampleServiceGroup回滚",
 			fields: fields{
 				Type:              TypePackageServiceEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/service/example"`,
 				StructName:        "ExampleServiceGroup",
 				PackageName:       "example",
@@ -98,7 +99,7 @@ func TestPackageEnter_Injection(t *testing.T) {
 			name: "测试ExampleApiGroup注入",
 			fields: fields{
 				Type:              TypePackageApiEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/api/v1/example"`,
 				StructName:        "ExampleApiGroup",
 				PackageName:       "example",
@@ -109,7 +110,7 @@ func TestPackageEnter_Injection(t *testing.T) {
 			name: "测试ExampleRouterGroup注入",
 			fields: fields{
 				Type:              TypePackageRouterEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "router", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "router", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/router/example"`,
 				StructName:        "Example",
 				PackageName:       "example",
@@ -121,7 +122,7 @@ func TestPackageEnter_Injection(t *testing.T) {
 			name: "测试ExampleServiceGroup注入",
 			fields: fields{
 				Type:              TypePackageServiceEnter,
-				Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service", "enter.go"),
+				Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service", "enter.go"),
 				ImportPath:        `"github.com/icosmos-space/iadmin/server/service/example"`,
 				StructName:        "ExampleServiceGroup",
 				PackageName:       "example",

@@ -3,6 +3,7 @@ package initialize
 import (
 	"context"
 	"fmt"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model"
 	"github.com/pkg/errors"
@@ -10,7 +11,7 @@ import (
 )
 
 func Gorm(ctx context.Context) {
-	err := global.GVA_DB.WithContext(ctx).AutoMigrate(
+	err := global.IADMIN_DB.WithContext(ctx).AutoMigrate(
 		new(model.Info),
 	)
 	if err != nil {

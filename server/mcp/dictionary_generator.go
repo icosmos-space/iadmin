@@ -173,7 +173,7 @@ func (d *DictionaryOptionsGenerator) createDictionaryWithOptions(ctx context.Con
 
 	// 获取刚创建的字典ID
 	var createdDict system.SysDictionary
-	err = global.GVA_DB.Where("type = ?", req.DictType).First(&createdDict).Error
+	err = global.IADMIN_DB.Where("type = ?", req.DictType).First(&createdDict).Error
 	if err != nil {
 		return nil, fmt.Errorf("获取创建的字典失败: %v", err)
 	}
@@ -193,7 +193,7 @@ func (d *DictionaryOptionsGenerator) createDictionaryWithOptions(ctx context.Con
 
 		err = dictionaryDetailService.CreateSysDictionaryDetail(dictionaryDetail)
 		if err != nil {
-			global.GVA_LOG.Warn("创建字典详情项失败", zap.Error(err))
+			global.IADMIN_LOG.Warn("创建字典详情项失败", zap.Error(err))
 		} else {
 			successCount++
 		}
@@ -210,7 +210,7 @@ func (d *DictionaryOptionsGenerator) createDictionaryWithOptions(ctx context.Con
 // checkDictionaryExists 检查字典是否存在
 func (d *DictionaryOptionsGenerator) checkDictionaryExists(dictType string) (bool, error) {
 	var dictionary system.SysDictionary
-	err := global.GVA_DB.Where("type = ?", dictType).First(&dictionary).Error
+	err := global.IADMIN_DB.Where("type = ?", dictType).First(&dictionary).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil // 字典不存在

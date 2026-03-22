@@ -247,9 +247,9 @@ func (m *MenuCreator) Handle(ctx context.Context, request mcp.CallToolRequest) (
 
 	// 获取创建的菜单ID
 	var createdMenu system.SysBaseMenu
-	err = global.GVA_DB.Where("name = ? AND path = ?", name, path).First(&createdMenu).Error
+	err = global.IADMIN_DB.Where("name = ? AND path = ?", name, path).First(&createdMenu).Error
 	if err != nil {
-		global.GVA_LOG.Warn("获取创建的菜单ID失败", zap.Error(err))
+		global.IADMIN_LOG.Warn("获取创建的菜单ID失败", zap.Error(err))
 	}
 
 	// 构建响应

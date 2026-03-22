@@ -2,18 +2,19 @@ package system
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"text/template"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"github.com/icosmos-space/iadmin/server/utils"
 	"github.com/icosmos-space/iadmin/server/utils/autocode"
-	"os"
-	"path/filepath"
-	"text/template"
 )
 
 func (s *autoCodeTemplate) CreateMcp(ctx context.Context, info request.AutoMcpTool) (toolFilePath string, err error) {
-	mcpTemplatePath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "resource", "mcp", "tools.tpl")
-	mcpToolPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "mcp")
+	mcpTemplatePath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "resource", "mcp", "tools.tpl")
+	mcpToolPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "mcp")
 
 	var files *template.Template
 

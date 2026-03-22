@@ -44,11 +44,11 @@ func (s *autoCodePackage) Create(ctx context.Context, info *request.SysAutoCodeP
 	default:
 		break
 	}
-	if !errors.Is(global.GVA_DB.Where("package_name = ? and template = ?", info.PackageName, info.Template).First(&model.SysAutoCodePackage{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.IADMIN_DB.Where("package_name = ? and template = ?", info.PackageName, info.Template).First(&model.SysAutoCodePackage{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同PackageName")
 	}
 	create := info.Create()
-	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return global.IADMIN_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		err := tx.Create(&create).Error
 		if err != nil {
 			return errors.Wrap(err, "创建失败!")
@@ -108,7 +108,7 @@ func (s *autoCodePackage) Create(ctx context.Context, info *request.SysAutoCodeP
 // @author: [piexlmax](https://github.com/piexlmax)
 // @author: [SliverHorn](https://github.com/SliverHorn)
 func (s *autoCodePackage) Delete(ctx context.Context, info common.GetById) error {
-	err := global.GVA_DB.WithContext(ctx).Delete(&model.SysAutoCodePackage{}, info.Uint()).Error
+	err := global.IADMIN_DB.WithContext(ctx).Delete(&model.SysAutoCodePackage{}, info.Uint()).Error
 	if err != nil {
 		return errors.Wrap(err, "删除失败!")
 	}
@@ -122,7 +122,7 @@ func (s *autoCodePackage) DeleteByNames(ctx context.Context, names []string) err
 	if len(names) == 0 {
 		return nil
 	}
-	err := global.GVA_DB.WithContext(ctx).Where("package_name IN ?", names).Delete(&model.SysAutoCodePackage{}).Error
+	err := global.IADMIN_DB.WithContext(ctx).Where("package_name IN ?", names).Delete(&model.SysAutoCodePackage{}).Error
 	if err != nil {
 		return errors.Wrap(err, "删除失败!")
 	}
@@ -135,8 +135,8 @@ func (s *autoCodePackage) DeleteByNames(ctx context.Context, names []string) err
 func (s *autoCodePackage) All(ctx context.Context) (entities []model.SysAutoCodePackage, err error) {
 	server := make([]model.SysAutoCodePackage, 0)
 	plugin := make([]model.SysAutoCodePackage, 0)
-	serverPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service")
-	pluginPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin")
+	serverPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service")
+	pluginPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin")
 	serverDir, err := os.ReadDir(serverPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "读取service文件夹失败!")
@@ -152,7 +152,7 @@ func (s *autoCodePackage) All(ctx context.Context) (entities []model.SysAutoCode
 				Template:    "package",
 				Label:       serverDir[i].Name() + "包",
 				Desc:        "系统自动读取" + serverDir[i].Name() + "包",
-				Module:      global.GVA_CONFIG.AutoCode.Module,
+				Module:      global.IADMIN_CONFIG.AutoCode.Module,
 			}
 			server = append(server, serverPackage)
 		}
@@ -198,13 +198,13 @@ func (s *autoCodePackage) All(ctx context.Context) (entities []model.SysAutoCode
 				Template:    "plugin",
 				Label:       pluginDir[i].Name() + "插件",
 				Desc:        desc,
-				Module:      global.GVA_CONFIG.AutoCode.Module,
+				Module:      global.IADMIN_CONFIG.AutoCode.Module,
 			}
 			plugin = append(plugin, pluginPackage)
 		}
 	}
 
-	err = global.GVA_DB.WithContext(ctx).Find(&entities).Error
+	err = global.IADMIN_DB.WithContext(ctx).Find(&entities).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "获取所有包失败!")
 	}
@@ -229,7 +229,7 @@ func (s *autoCodePackage) All(ctx context.Context) (entities []model.SysAutoCode
 	}
 
 	if len(createEntity) > 0 {
-		err = global.GVA_DB.WithContext(ctx).Create(&createEntity).Error
+		err = global.IADMIN_DB.WithContext(ctx).Create(&createEntity).Error
 		if err != nil {
 			return nil, errors.Wrap(err, "同步失败!")
 		}
@@ -256,7 +256,7 @@ func (s *autoCodePackage) All(ctx context.Context) (entities []model.SysAutoCode
 
 	// 删除数据库中不存在文件的记录
 	if len(deleteEntityIDs) > 0 {
-		err = global.GVA_DB.WithContext(ctx).Delete(&model.SysAutoCodePackage{}, deleteEntityIDs).Error
+		err = global.IADMIN_DB.WithContext(ctx).Delete(&model.SysAutoCodePackage{}, deleteEntityIDs).Error
 		if err != nil {
 			return nil, errors.Wrap(err, "删除不存在的包记录失败!")
 		}
@@ -305,7 +305,7 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 	code = make(map[string]string)
 	asts = make(map[string]ast.Ast)
 	creates = make(map[string]string)
-	templateDir := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "resource", entity.Template)
+	templateDir := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "resource", entity.Template)
 	templateDirs, err := os.ReadDir(templateDir)
 	if err != nil {
 		return nil, nil, nil, errors.Wrapf(err, "读取模版文件夹[%s]失败!", templateDir)
@@ -336,9 +336,9 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 					if name == "main.go" || name == "plugin.go" {
 						pluginInitialize := &ast.PluginInitializeV2{
 							Type:        ast.TypePluginInitializeV2,
-							Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, name),
-							PluginPath:  filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "register.go"),
-							ImportPath:  fmt.Sprintf(`"%s/plugin/%s"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+							Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, name),
+							PluginPath:  filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "register.go"),
+							ImportPath:  fmt.Sprintf(`"%s/plugin/%s"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 							PackageName: entity.PackageName,
 						}
 						asts[pluginInitialize.PluginPath+"=>"+pluginInitialize.Type.String()] = pluginInitialize
@@ -374,9 +374,9 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							return nil, nil, nil, errors.Errorf("[filpath:%s]非法模版文件!", four)
 						}
 						if entity.Template == "package" {
-							create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, info.HumpPackageName+".go")
+							create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, info.HumpPackageName+".go")
 							if api != -1 {
-								create = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", entity.PackageName, info.HumpPackageName+".go")
+								create = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", entity.PackageName, info.HumpPackageName+".go")
 							}
 							if hasEnter != -1 {
 								isApi := strings.Index(secondDirs[j].Name(), "api")
@@ -385,8 +385,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 								if isApi != -1 {
 									packageApiEnter := &ast.PackageEnter{
 										Type:              ast.TypePackageApiEnter,
-										Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", "enter.go"),
-										ImportPath:        fmt.Sprintf(`"%s/%s/%s/%s"`, global.GVA_CONFIG.AutoCode.Module, "api", "v1", entity.PackageName),
+										Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", "enter.go"),
+										ImportPath:        fmt.Sprintf(`"%s/%s/%s/%s"`, global.IADMIN_CONFIG.AutoCode.Module, "api", "v1", entity.PackageName),
 										StructName:        utils.FirstUpper(entity.PackageName) + "ApiGroup",
 										PackageName:       entity.PackageName,
 										PackageStructName: "ApiGroup",
@@ -394,8 +394,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 									asts[packageApiEnter.Path+"=>"+packageApiEnter.Type.String()] = packageApiEnter
 									packageApiModuleEnter := &ast.PackageModuleEnter{
 										Type:        ast.TypePackageApiModuleEnter,
-										Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", entity.PackageName, "enter.go"),
-										ImportPath:  fmt.Sprintf(`"%s/service"`, global.GVA_CONFIG.AutoCode.Module),
+										Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), "v1", entity.PackageName, "enter.go"),
+										ImportPath:  fmt.Sprintf(`"%s/service"`, global.IADMIN_CONFIG.AutoCode.Module),
 										StructName:  info.StructName + "Api",
 										AppName:     "ServiceGroupApp",
 										GroupName:   utils.FirstUpper(entity.PackageName) + "ServiceGroup",
@@ -409,8 +409,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 								if isRouter != -1 {
 									packageRouterEnter := &ast.PackageEnter{
 										Type:              ast.TypePackageRouterEnter,
-										Path:              filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), "enter.go"),
-										ImportPath:        fmt.Sprintf(`"%s/%s/%s"`, global.GVA_CONFIG.AutoCode.Module, secondDirs[j].Name(), entity.PackageName),
+										Path:              filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), "enter.go"),
+										ImportPath:        fmt.Sprintf(`"%s/%s/%s"`, global.IADMIN_CONFIG.AutoCode.Module, secondDirs[j].Name(), entity.PackageName),
 										StructName:        utils.FirstUpper(entity.PackageName),
 										PackageName:       entity.PackageName,
 										PackageStructName: "RouterGroup",
@@ -418,8 +418,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 									asts[packageRouterEnter.Path+"=>"+packageRouterEnter.Type.String()] = packageRouterEnter
 									packageRouterModuleEnter := &ast.PackageModuleEnter{
 										Type:        ast.TypePackageRouterModuleEnter,
-										Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, "enter.go"),
-										ImportPath:  fmt.Sprintf(`api "%s/api/v1"`, global.GVA_CONFIG.AutoCode.Module),
+										Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, "enter.go"),
+										ImportPath:  fmt.Sprintf(`api "%s/api/v1"`, global.IADMIN_CONFIG.AutoCode.Module),
 										StructName:  info.StructName + "Router",
 										AppName:     "ApiGroupApp",
 										GroupName:   utils.FirstUpper(entity.PackageName) + "ApiGroup",
@@ -431,8 +431,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 									asts[packageRouterModuleEnter.Path+"=>"+packageRouterModuleEnter.Type.String()] = packageRouterModuleEnter
 									packageInitializeRouter := &ast.PackageInitializeRouter{
 										Type:                 ast.TypePackageInitializeRouter,
-										Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
-										ImportPath:           fmt.Sprintf(`"%s/router"`, global.GVA_CONFIG.AutoCode.Module),
+										Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
+										ImportPath:           fmt.Sprintf(`"%s/router"`, global.IADMIN_CONFIG.AutoCode.Module),
 										AppName:              "RouterGroupApp",
 										GroupName:            utils.FirstUpper(entity.PackageName),
 										ModuleName:           entity.PackageName + "Router",
@@ -444,8 +444,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 									asts[packageInitializeRouter.Path+"=>"+packageInitializeRouter.Type.String()] = packageInitializeRouter
 								}
 								if isService != -1 {
-									path := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext))
-									importPath := fmt.Sprintf(`"%s/service/%s"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName)
+									path := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext))
+									importPath := fmt.Sprintf(`"%s/service/%s"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName)
 									packageServiceEnter := &ast.PackageEnter{
 										Type:              ast.TypePackageServiceEnter,
 										Path:              path,
@@ -457,7 +457,7 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 									asts[packageServiceEnter.Path+"=>"+packageServiceEnter.Type.String()] = packageServiceEnter
 									packageServiceModuleEnter := &ast.PackageModuleEnter{
 										Type:       ast.TypePackageServiceModuleEnter,
-										Path:       filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, "enter.go"),
+										Path:       filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, "enter.go"),
 										StructName: info.StructName + "Service",
 									}
 									asts[packageServiceModuleEnter.Path+"=>"+packageServiceModuleEnter.Type.String()] = packageServiceModuleEnter
@@ -475,8 +475,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							if isRouter != -1 {
 								pluginRouterEnter := &ast.PluginEnter{
 									Type:            ast.TypePluginRouterEnter,
-									Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
-									ImportPath:      fmt.Sprintf(`"%s/plugin/%s/api"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+									Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+									ImportPath:      fmt.Sprintf(`"%s/plugin/%s/api"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 									StructName:      info.StructName,
 									StructCamelName: info.Abbreviation,
 									ModuleName:      "api" + info.StructName,
@@ -490,8 +490,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							if isApi != -1 {
 								pluginApiEnter := &ast.PluginEnter{
 									Type:            ast.TypePluginApiEnter,
-									Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
-									ImportPath:      fmt.Sprintf(`"%s/plugin/%s/service"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+									Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+									ImportPath:      fmt.Sprintf(`"%s/plugin/%s/service"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 									StructName:      info.StructName,
 									StructCamelName: info.Abbreviation,
 									ModuleName:      "service" + info.StructName,
@@ -505,7 +505,7 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							if isService != -1 {
 								pluginServiceEnter := &ast.PluginEnter{
 									Type:            ast.TypePluginServiceEnter,
-									Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+									Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
 									StructName:      info.StructName,
 									StructCamelName: info.Abbreviation,
 								}
@@ -514,7 +514,7 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							}
 							continue
 						} // enter.go
-						create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), info.HumpPackageName+".go")
+						create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), info.HumpPackageName+".go")
 						code[four] = create
 					}
 				case "gen", "config", "initialize", "plugin", "response":
@@ -552,13 +552,13 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							return nil, nil, nil, errors.Errorf("[filpath:%s]非法模版文件!", four)
 						}
 						if api != -1 || menu != -1 || viper != -1 || response != -1 || plugin != -1 || config != -1 || dictionary != -1 {
-							creates[four] = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext))
+							creates[four] = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext))
 						}
 						if gen != -1 {
 							pluginGen := &ast.PluginGen{
 								Type:        ast.TypePluginGen,
-								Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
-								ImportPath:  fmt.Sprintf(`"%s/plugin/%s/model"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+								Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+								ImportPath:  fmt.Sprintf(`"%s/plugin/%s/model"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 								StructName:  info.StructName,
 								PackageName: "model",
 								IsNew:       true,
@@ -569,8 +569,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 						if hasGorm != -1 {
 							pluginInitializeGorm := &ast.PluginInitializeGorm{
 								Type:        ast.TypePluginInitializeGorm,
-								Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
-								ImportPath:  fmt.Sprintf(`"%s/plugin/%s/model"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+								Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+								ImportPath:  fmt.Sprintf(`"%s/plugin/%s/model"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 								StructName:  info.StructName,
 								PackageName: "model",
 								IsNew:       true,
@@ -581,8 +581,8 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 						if router != -1 {
 							pluginInitializeRouter := &ast.PluginInitializeRouter{
 								Type:                 ast.TypePluginInitializeRouter,
-								Path:                 filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
-								ImportPath:           fmt.Sprintf(`"%s/plugin/%s/router"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+								Path:                 filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), strings.TrimSuffix(threeDirs[k].Name(), ext)),
+								ImportPath:           fmt.Sprintf(`"%s/plugin/%s/router"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 								AppName:              "Router",
 								GroupName:            info.StructName,
 								PackageName:          "router",
@@ -627,9 +627,9 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 								if hasRequest == -1 {
 									return nil, nil, nil, errors.Errorf("[filpath:%s]非法模版文件!", five)
 								}
-								create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), threeDirs[k].Name(), info.HumpPackageName+".go")
+								create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), threeDirs[k].Name(), info.HumpPackageName+".go")
 								if entity.Template == "package" {
-									create = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, threeDirs[k].Name(), info.HumpPackageName+".go")
+									create = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, threeDirs[k].Name(), info.HumpPackageName+".go")
 								}
 								code[five] = create
 							}
@@ -643,12 +643,12 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 						if hasModel == -1 {
 							return nil, nil, nil, errors.Errorf("[filpath:%s]非法模版文件!", four)
 						}
-						create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), info.HumpPackageName+".go")
+						create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", entity.PackageName, secondDirs[j].Name(), info.HumpPackageName+".go")
 						if entity.Template == "package" {
 							packageInitializeGorm := &ast.PackageInitializeGorm{
 								Type:        ast.TypePackageInitializeGorm,
-								Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
-								ImportPath:  fmt.Sprintf(`"%s/model/%s"`, global.GVA_CONFIG.AutoCode.Module, entity.PackageName),
+								Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+								ImportPath:  fmt.Sprintf(`"%s/model/%s"`, global.IADMIN_CONFIG.AutoCode.Module, entity.PackageName),
 								Business:    info.BusinessDB,
 								StructName:  info.StructName,
 								PackageName: entity.PackageName,
@@ -656,7 +656,7 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 							}
 							code[four] = packageInitializeGorm.Path
 							asts[packageInitializeGorm.Path+"=>"+packageInitializeGorm.Type.String()] = packageInitializeGorm
-							create = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, info.HumpPackageName+".go")
+							create = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, secondDirs[j].Name(), entity.PackageName, info.HumpPackageName+".go")
 						}
 						code[four] = create
 					}
@@ -712,18 +712,18 @@ func (s *autoCodePackage) templates(ctx context.Context, entity model.SysAutoCod
 								formPath := filepath.Join(three, "form.vue"+ext)
 								value, ok := code[formPath]
 								if ok {
-									value = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName, info.PackageName+"Form"+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
+									value = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName, info.PackageName+"Form"+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
 									code[formPath] = value
 								}
 							}
-							create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName, info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
+							create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName, info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
 							if api != -1 {
-								create = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
+								create = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot(), secondDirs[j].Name(), entity.PackageName, info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
 							}
 							code[four] = create
 							continue
 						}
-						create := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot(), "plugin", entity.PackageName, secondDirs[j].Name(), info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
+						create := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot(), "plugin", entity.PackageName, secondDirs[j].Name(), info.PackageName+filepath.Ext(strings.TrimSuffix(threeDirs[k].Name(), ext)))
 						code[four] = create
 					}
 				default:

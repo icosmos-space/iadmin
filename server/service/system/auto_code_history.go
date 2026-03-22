@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/icosmos-space/iadmin/server/utils/ast"
-	"github.com/pkg/errors"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/icosmos-space/iadmin/server/utils/ast"
+	"github.com/pkg/errors"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	common "github.com/icosmos-space/iadmin/server/model/common/request"
@@ -30,7 +31,7 @@ type autoCodeHistory struct{}
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) Create(ctx context.Context, info request.SysAutoHistoryCreate) error {
 	create := info.Create()
-	err := global.GVA_DB.WithContext(ctx).Create(&create).Error
+	err := global.IADMIN_DB.WithContext(ctx).Create(&create).Error
 	if err != nil {
 		return errors.Wrap(err, "创建失败!")
 	}
@@ -42,7 +43,7 @@ func (s *autoCodeHistory) Create(ctx context.Context, info request.SysAutoHistor
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) First(ctx context.Context, info common.GetById) (string, error) {
 	var meta string
-	err := global.GVA_DB.WithContext(ctx).Model(model.SysAutoCodeHistory{}).Where("id = ?", info.ID).Pluck("request", &meta).Error
+	err := global.IADMIN_DB.WithContext(ctx).Model(model.SysAutoCodeHistory{}).Where("id = ?", info.ID).Pluck("request", &meta).Error
 	if err != nil {
 		return "", errors.Wrap(err, "获取失败!")
 	}
@@ -54,7 +55,7 @@ func (s *autoCodeHistory) First(ctx context.Context, info common.GetById) (strin
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) Repeat(businessDB, structName, abbreviation, Package string) bool {
 	var count int64
-	global.GVA_DB.Model(&model.SysAutoCodeHistory{}).Where("business_db = ? and (struct_name = ? OR abbreviation = ?) and package = ? and flag = ?", businessDB, structName, abbreviation, Package, 0).Count(&count).Debug()
+	global.IADMIN_DB.Model(&model.SysAutoCodeHistory{}).Where("business_db = ? and (struct_name = ? OR abbreviation = ?) and package = ? and flag = ?", businessDB, structName, abbreviation, Package, 0).Count(&count).Debug()
 	return count > 0
 }
 
@@ -63,12 +64,12 @@ func (s *autoCodeHistory) Repeat(businessDB, structName, abbreviation, Package s
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) RollBack(ctx context.Context, info request.SysAutoHistoryRollBack) error {
 	var history model.SysAutoCodeHistory
-	err := global.GVA_DB.Where("id = ?", info.ID).First(&history).Error
+	err := global.IADMIN_DB.Where("id = ?", info.ID).First(&history).Error
 	if err != nil {
 		return err
 	}
 	if history.ExportTemplateID != 0 {
-		err = global.GVA_DB.Delete(&model.SysExportTemplate{}, "id = ?", history.ExportTemplateID).Error
+		err = global.IADMIN_DB.Delete(&model.SysExportTemplate{}, "id = ?", history.ExportTemplateID).Error
 		if err != nil {
 			return err
 		}
@@ -77,7 +78,7 @@ func (s *autoCodeHistory) RollBack(ctx context.Context, info request.SysAutoHist
 		ids := info.ApiIds(history)
 		err = ApiServiceApp.DeleteApisByIds(ids)
 		if err != nil {
-			global.GVA_LOG.Error("ClearTag DeleteApiByIds:", zap.Error(err))
+			global.IADMIN_LOG.Error("ClearTag DeleteApiByIds:", zap.Error(err))
 		}
 	} // 清除API表
 	if info.DeleteMenu {
@@ -95,14 +96,14 @@ func (s *autoCodeHistory) RollBack(ctx context.Context, info request.SysAutoHist
 	templates := make(map[string]string, len(history.Templates))
 	for key, template := range history.Templates {
 		{
-			server := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server)
+			server := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server)
 			keys := strings.Split(key, "/")
 			key = filepath.Join(keys...)
 			key = strings.TrimPrefix(key, server)
 		} // key
 		{
-			web := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.WebRoot())
-			server := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server)
+			web := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.WebRoot())
+			server := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server)
 			slices := strings.Split(template, "/")
 			template = filepath.Join(slices...)
 			ext := path.Ext(template)
@@ -163,18 +164,18 @@ func (s *autoCodeHistory) RollBack(ctx context.Context, info request.SysAutoHist
 			fmt.Printf("[filepath:%s]回滚注入代码成功!\n", key)
 		}
 	} // 清除注入代码
-	removeBasePath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, "rm_file", strconv.FormatInt(int64(time.Now().Nanosecond()), 10))
+	removeBasePath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, "rm_file", strconv.FormatInt(int64(time.Now().Nanosecond()), 10))
 	for _, value := range history.Templates {
 		if !filepath.IsAbs(value) {
 			continue
 		}
-		removePath := filepath.Join(removeBasePath, strings.TrimPrefix(value, global.GVA_CONFIG.AutoCode.Root))
+		removePath := filepath.Join(removeBasePath, strings.TrimPrefix(value, global.IADMIN_CONFIG.AutoCode.Root))
 		err = utils.FileMove(value, removePath)
 		if err != nil {
 			return errors.Wrapf(err, "[src:%s][dst:%s]文件移动失败!", value, removePath)
 		}
 	} // 移动文件
-	err = global.GVA_DB.WithContext(ctx).Model(&model.SysAutoCodeHistory{}).Where("id = ?", info.ID).Update("flag", 1).Error
+	err = global.IADMIN_DB.WithContext(ctx).Model(&model.SysAutoCodeHistory{}).Where("id = ?", info.ID).Update("flag", 1).Error
 	if err != nil {
 		return errors.Wrap(err, "更新失败!")
 	}
@@ -185,7 +186,7 @@ func (s *autoCodeHistory) RollBack(ctx context.Context, info request.SysAutoHist
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) Delete(ctx context.Context, info common.GetById) error {
-	err := global.GVA_DB.WithContext(ctx).Where("id = ?", info.Uint()).Delete(&model.SysAutoCodeHistory{}).Error
+	err := global.IADMIN_DB.WithContext(ctx).Where("id = ?", info.Uint()).Delete(&model.SysAutoCodeHistory{}).Error
 	if err != nil {
 		return errors.Wrap(err, "删除失败!")
 	}
@@ -197,7 +198,7 @@ func (s *autoCodeHistory) Delete(ctx context.Context, info common.GetById) error
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (s *autoCodeHistory) GetList(ctx context.Context, info common.PageInfo) (list []model.SysAutoCodeHistory, total int64, err error) {
 	var entities []model.SysAutoCodeHistory
-	db := global.GVA_DB.WithContext(ctx).Model(&model.SysAutoCodeHistory{})
+	db := global.IADMIN_DB.WithContext(ctx).Model(&model.SysAutoCodeHistory{})
 	err = db.Count(&total).Error
 	if err != nil {
 		return nil, total, err
@@ -212,6 +213,6 @@ func (s *autoCodeHistory) DropTable(BusinessDb, tableName string) error {
 	if BusinessDb != "" {
 		return global.MustGetGlobalDBByDBName(BusinessDb).Exec("DROP TABLE " + tableName).Error
 	} else {
-		return global.GVA_DB.Exec("DROP TABLE " + tableName).Error
+		return global.IADMIN_DB.Exec("DROP TABLE " + tableName).Error
 	}
 }

@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPackageInitializeRouter_Injection(t *testing.T) {
@@ -27,7 +28,7 @@ func TestPackageInitializeRouter_Injection(t *testing.T) {
 			name: "测试 InitCustomerRouter 注入",
 			fields: fields{
 				Type:            TypePackageInitializeRouter,
-				Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
+				Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
 				ImportPath:      `"github.com/icosmos-space/iadmin/server/router"`,
 				AppName:         "RouterGroupApp",
 				GroupName:       "Example",
@@ -42,7 +43,7 @@ func TestPackageInitializeRouter_Injection(t *testing.T) {
 			name: "测试 InitFileUploadAndDownloadRouter 注入",
 			fields: fields{
 				Type:            TypePackageInitializeRouter,
-				Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
+				Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
 				ImportPath:      `"github.com/icosmos-space/iadmin/server/router"`,
 				AppName:         "RouterGroupApp",
 				GroupName:       "Example",
@@ -104,7 +105,7 @@ func TestPackageInitializeRouter_Rollback(t *testing.T) {
 			name: "测试 InitCustomerRouter 回滚",
 			fields: fields{
 				Type:            TypePackageInitializeRouter,
-				Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
+				Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
 				ImportPath:      `"github.com/icosmos-space/iadmin/server/router"`,
 				AppName:         "RouterGroupApp",
 				GroupName:       "Example",
@@ -119,7 +120,7 @@ func TestPackageInitializeRouter_Rollback(t *testing.T) {
 			name: "测试 InitFileUploadAndDownloadRouter 回滚",
 			fields: fields{
 				Type:            TypePackageInitializeRouter,
-				Path:            filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
+				Path:            filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "router_biz.go"),
 				ImportPath:      `"github.com/icosmos-space/iadmin/server/router"`,
 				AppName:         "RouterGroupApp",
 				GroupName:       "Example",

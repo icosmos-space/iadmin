@@ -23,15 +23,15 @@ type ApiService struct{}
 var ApiServiceApp = new(ApiService)
 
 func (apiService *ApiService) CreateApi(api system.SysApi) (err error) {
-	if !errors.Is(global.GVA_DB.Where("path = ? AND method = ?", api.Path, api.Method).First(&system.SysApi{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.IADMIN_DB.Where("path = ? AND method = ?", api.Path, api.Method).First(&system.SysApi{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同api")
 	}
-	return global.GVA_DB.Create(&api).Error
+	return global.IADMIN_DB.Create(&api).Error
 }
 
 func (apiService *ApiService) GetApiGroups() (groups []string, groupApiMap map[string]string, err error) {
 	var apis []system.SysApi
-	err = global.GVA_DB.Find(&apis).Error
+	err = global.IADMIN_DB.Find(&apis).Error
 	if err != nil {
 		return
 	}
@@ -57,12 +57,12 @@ func (apiService *ApiService) SyncApi() (newApis, deleteApis, ignoreApis []syste
 	deleteApis = make([]system.SysApi, 0)
 	ignoreApis = make([]system.SysApi, 0)
 	var apis []system.SysApi
-	err = global.GVA_DB.Find(&apis).Error
+	err = global.IADMIN_DB.Find(&apis).Error
 	if err != nil {
 		return
 	}
 	var ignores []system.SysIgnoreApi
-	err = global.GVA_DB.Find(&ignores).Error
+	err = global.IADMIN_DB.Find(&ignores).Error
 	if err != nil {
 		return
 	}
@@ -77,17 +77,17 @@ func (apiService *ApiService) SyncApi() (newApis, deleteApis, ignoreApis []syste
 	}
 
 	var cacheApis []system.SysApi
-	for i := range global.GVA_ROUTERS {
+	for i := range global.IADMIN_ROUTERS {
 		ignoresFlag := false
 		for j := range ignores {
-			if ignores[j].Path == global.GVA_ROUTERS[i].Path && ignores[j].Method == global.GVA_ROUTERS[i].Method {
+			if ignores[j].Path == global.IADMIN_ROUTERS[i].Path && ignores[j].Method == global.IADMIN_ROUTERS[i].Method {
 				ignoresFlag = true
 			}
 		}
 		if !ignoresFlag {
 			cacheApis = append(cacheApis, system.SysApi{
-				Path:   global.GVA_ROUTERS[i].Path,
-				Method: global.GVA_ROUTERS[i].Method,
+				Path:   global.IADMIN_ROUTERS[i].Path,
+				Method: global.IADMIN_ROUTERS[i].Method,
 			})
 		}
 	}
@@ -128,13 +128,13 @@ func (apiService *ApiService) SyncApi() (newApis, deleteApis, ignoreApis []syste
 
 func (apiService *ApiService) IgnoreApi(ignoreApi system.SysIgnoreApi) (err error) {
 	if ignoreApi.Flag {
-		return global.GVA_DB.Create(&ignoreApi).Error
+		return global.IADMIN_DB.Create(&ignoreApi).Error
 	}
-	return global.GVA_DB.Unscoped().Delete(&ignoreApi, "path = ? AND method = ?", ignoreApi.Path, ignoreApi.Method).Error
+	return global.IADMIN_DB.Unscoped().Delete(&ignoreApi, "path = ? AND method = ?", ignoreApi.Path, ignoreApi.Method).Error
 }
 
 func (apiService *ApiService) EnterSyncApi(syncApis systemRes.SysSyncApis) (err error) {
-	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	return global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		var txErr error
 		if len(syncApis.NewApis) > 0 {
 			txErr = tx.Create(&syncApis.NewApis).Error
@@ -161,11 +161,11 @@ func (apiService *ApiService) EnterSyncApi(syncApis systemRes.SysSyncApis) (err 
 
 func (apiService *ApiService) DeleteApi(api system.SysApi) (err error) {
 	var entity system.SysApi
-	err = global.GVA_DB.First(&entity, "id = ?", api.ID).Error // 根据id查询api记录
-	if errors.Is(err, gorm.ErrRecordNotFound) {                // api记录不存在
+	err = global.IADMIN_DB.First(&entity, "id = ?", api.ID).Error // 根据id查询api记录
+	if errors.Is(err, gorm.ErrRecordNotFound) {                   // api记录不存在
 		return err
 	}
-	err = global.GVA_DB.Delete(&entity).Error
+	err = global.IADMIN_DB.Delete(&entity).Error
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func (apiService *ApiService) DeleteApi(api system.SysApi) (err error) {
 func (apiService *ApiService) GetAPIInfoList(api system.SysApi, info request.PageInfo, order string, desc bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&system.SysApi{})
+	db := global.IADMIN_DB.Model(&system.SysApi{})
 	var apiList []system.SysApi
 
 	if api.Path != "" {
@@ -239,8 +239,8 @@ func (apiService *ApiService) GetAllApis(authorityID uint) (apis []system.SysApi
 	if err != nil {
 		return nil, err
 	}
-	err = global.GVA_DB.Order("id desc").Find(&apis).Error
-	if parentAuthorityID == 0 || !global.GVA_CONFIG.System.UseStrictAuth {
+	err = global.IADMIN_DB.Order("id desc").Find(&apis).Error
+	if parentAuthorityID == 0 || !global.IADMIN_CONFIG.System.UseStrictAuth {
 		return
 	}
 	paths := CasbinServiceApp.GetPolicyPathByAuthorityId(authorityID)
@@ -263,7 +263,7 @@ func (apiService *ApiService) GetAllApis(authorityID uint) (apis []system.SysApi
 //@return: api model.SysApi, err error
 
 func (apiService *ApiService) GetApiById(id int) (api system.SysApi, err error) {
-	err = global.GVA_DB.First(&api, "id = ?", id).Error
+	err = global.IADMIN_DB.First(&api, "id = ?", id).Error
 	return
 }
 
@@ -275,10 +275,10 @@ func (apiService *ApiService) GetApiById(id int) (api system.SysApi, err error) 
 
 func (apiService *ApiService) UpdateApi(api system.SysApi) (err error) {
 	var oldA system.SysApi
-	err = global.GVA_DB.First(&oldA, "id = ?", api.ID).Error
+	err = global.IADMIN_DB.First(&oldA, "id = ?", api.ID).Error
 	if oldA.Path != api.Path || oldA.Method != api.Method {
 		var duplicateApi system.SysApi
-		if ferr := global.GVA_DB.First(&duplicateApi, "path = ? AND method = ?", api.Path, api.Method).Error; ferr != nil {
+		if ferr := global.IADMIN_DB.First(&duplicateApi, "path = ? AND method = ?", api.Path, api.Method).Error; ferr != nil {
 			if !errors.Is(ferr, gorm.ErrRecordNotFound) {
 				return ferr
 			}
@@ -298,7 +298,7 @@ func (apiService *ApiService) UpdateApi(api system.SysApi) (err error) {
 		return err
 	}
 
-	return global.GVA_DB.Save(&api).Error
+	return global.IADMIN_DB.Save(&api).Error
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -308,7 +308,7 @@ func (apiService *ApiService) UpdateApi(api system.SysApi) (err error) {
 //@return: err error
 
 func (apiService *ApiService) DeleteApisByIds(ids request.IdsReq) (err error) {
-	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	return global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		var apis []system.SysApi
 		err = tx.Find(&apis, "id in ?", ids.Ids).Error
 		if err != nil {

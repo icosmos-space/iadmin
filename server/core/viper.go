@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/icosmos-space/iadmin/server/core/internal"
-	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
+	"github.com/icosmos-space/iadmin/server/core/internal"
+	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/spf13/viper"
 )
 
@@ -28,16 +28,16 @@ func Viper() *viper.Viper {
 
 	v.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("config file changed:", e.Name)
-		if err = v.Unmarshal(&global.GVA_CONFIG); err != nil {
+		if err = v.Unmarshal(&global.IADMIN_CONFIG); err != nil {
 			fmt.Println(err)
 		}
 	})
-	if err = v.Unmarshal(&global.GVA_CONFIG); err != nil {
+	if err = v.Unmarshal(&global.IADMIN_CONFIG); err != nil {
 		panic(fmt.Errorf("fatal error unmarshal config: %w", err))
 	}
 
 	// root 适配性 根据root位置去找到对应迁移位置,保证root路径有效
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	global.IADMIN_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	return v
 }
 

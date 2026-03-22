@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"github.com/gin-gonic/gin"
+	"github.com/icosmos-space/iadmin/server/model/system/request"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
@@ -23,10 +23,10 @@ type DictionaryService struct{}
 var DictionaryServiceApp = new(DictionaryService)
 
 func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary system.SysDictionary) (err error) {
-	if (!errors.Is(global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound)) {
+	if (!errors.Is(global.IADMIN_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound)) {
 		return errors.New("存在相同的type，不允许创建")
 	}
-	err = global.GVA_DB.Create(&sysDictionary).Error
+	err = global.IADMIN_DB.Create(&sysDictionary).Error
 	return err
 }
 
@@ -37,20 +37,20 @@ func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary sy
 //@return: err error
 
 func (dictionaryService *DictionaryService) DeleteSysDictionary(sysDictionary system.SysDictionary) (err error) {
-	err = global.GVA_DB.Where("id = ?", sysDictionary.ID).Preload("SysDictionaryDetails").First(&sysDictionary).Error
+	err = global.IADMIN_DB.Where("id = ?", sysDictionary.ID).Preload("SysDictionaryDetails").First(&sysDictionary).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("请不要搞事")
 	}
 	if err != nil {
 		return err
 	}
-	err = global.GVA_DB.Delete(&sysDictionary).Error
+	err = global.IADMIN_DB.Delete(&sysDictionary).Error
 	if err != nil {
 		return err
 	}
 
 	if sysDictionary.SysDictionaryDetails != nil {
-		return global.GVA_DB.Where("sys_dictionary_id=?", sysDictionary.ID).Delete(sysDictionary.SysDictionaryDetails).Error
+		return global.IADMIN_DB.Where("sys_dictionary_id=?", sysDictionary.ID).Delete(sysDictionary.SysDictionaryDetails).Error
 	}
 	return
 }
@@ -70,13 +70,13 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 		"Desc":     sysDictionary.Desc,
 		"ParentID": sysDictionary.ParentID,
 	}
-	err = global.GVA_DB.Where("id = ?", sysDictionary.ID).First(&dict).Error
+	err = global.IADMIN_DB.Where("id = ?", sysDictionary.ID).First(&dict).Error
 	if err != nil {
-		global.GVA_LOG.Debug(err.Error())
+		global.IADMIN_LOG.Debug(err.Error())
 		return errors.New("查询字典数据失败")
 	}
 	if dict.Type != sysDictionary.Type {
-		if !errors.Is(global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound) {
+		if !errors.Is(global.IADMIN_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound) {
 			return errors.New("存在相同的type，不允许创建")
 		}
 	}
@@ -88,7 +88,7 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 		}
 	}
 
-	err = global.GVA_DB.Model(&dict).Updates(sysDictionaryMap).Error
+	err = global.IADMIN_DB.Model(&dict).Updates(sysDictionaryMap).Error
 	return err
 }
 
@@ -105,7 +105,7 @@ func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uin
 	} else {
 		flag = *status
 	}
-	err = global.GVA_DB.Where("(type = ? OR id = ?) and status = ?", Type, Id, flag).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
+	err = global.IADMIN_DB.Where("(type = ? OR id = ?) and status = ?", Type, Id, flag).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
 		return db.Where("status = ? and deleted_at is null", true).Order("sort")
 	}).First(&sysDictionary).Error
 	return
@@ -120,7 +120,7 @@ func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uin
 
 func (dictionaryService *DictionaryService) GetSysDictionaryInfoList(c *gin.Context, req request.SysDictionarySearch) (list interface{}, err error) {
 	var sysDictionarys []system.SysDictionary
-	query := global.GVA_DB.WithContext(c)
+	query := global.IADMIN_DB.WithContext(c)
 	if req.Name != "" {
 		query = query.Where("name LIKE ? OR type LIKE ?", "%"+req.Name+"%", "%"+req.Name+"%")
 	}
@@ -138,7 +138,7 @@ func (dictionaryService *DictionaryService) checkCircularReference(currentID uin
 
 	// 递归检查父级链条
 	var parent system.SysDictionary
-	err := global.GVA_DB.Where("id = ?", parentID).First(&parent).Error
+	err := global.IADMIN_DB.Where("id = ?", parentID).First(&parent).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil // 父级不存在，允许设置
@@ -163,7 +163,7 @@ func (dictionaryService *DictionaryService) checkCircularReference(currentID uin
 func (dictionaryService *DictionaryService) ExportSysDictionary(id uint) (exportData map[string]interface{}, err error) {
 	var dictionary system.SysDictionary
 	// 查询字典及其所有详情
-	err = global.GVA_DB.Where("id = ?", id).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
+	err = global.IADMIN_DB.Where("id = ?", id).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
 		return db.Order("sort")
 	}).First(&dictionary).Error
 	if err != nil {
@@ -219,7 +219,7 @@ func (dictionaryService *DictionaryService) ImportSysDictionary(jsonStr string) 
 	}
 
 	// 检查字典类型是否已存在
-	if !errors.Is(global.GVA_DB.First(&system.SysDictionary{}, "type = ?", importData.Type).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.IADMIN_DB.First(&system.SysDictionary{}, "type = ?", importData.Type).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同的type，不允许导入")
 	}
 
@@ -232,7 +232,7 @@ func (dictionaryService *DictionaryService) ImportSysDictionary(jsonStr string) 
 	}
 
 	// 开启事务
-	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	return global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		// 创建字典
 		if err := tx.Create(&dictionary).Error; err != nil {
 			return err

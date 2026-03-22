@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPluginGenModel_Injection(t *testing.T) {
@@ -24,7 +25,7 @@ func TestPluginGenModel_Injection(t *testing.T) {
 			name: "测试 GvaUser 结构体注入",
 			fields: fields{
 				Type:        TypePluginGen,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/plugin/gva/model"`,
 				PackageName: "model",
 				StructName:  "User",
@@ -35,7 +36,7 @@ func TestPluginGenModel_Injection(t *testing.T) {
 			name: "测试 GvaUser 结构体注入",
 			fields: fields{
 				Type:        TypePluginGen,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/plugin/gva/model"`,
 				PackageName: "model",
 				StructName:  "User",
@@ -84,7 +85,7 @@ func TestPluginGenModel_Rollback(t *testing.T) {
 			name: "测试 GvaUser 回滚",
 			fields: fields{
 				Type:        TypePluginGen,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/plugin/gva/model"`,
 				PackageName: "model",
 				StructName:  "User",
@@ -95,7 +96,7 @@ func TestPluginGenModel_Rollback(t *testing.T) {
 			name: "测试 GvaUser 回滚",
 			fields: fields{
 				Type:        TypePluginGen,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "gen", "main.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/plugin/gva/model"`,
 				PackageName: "model",
 				StructName:  "User",

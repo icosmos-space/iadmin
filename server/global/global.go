@@ -2,8 +2,9 @@ package global
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/server"
 	"sync"
+
+	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qiniu/qmgo"
@@ -23,20 +24,20 @@ import (
 )
 
 var (
-	GVA_DB        *gorm.DB
-	GVA_DBList    map[string]*gorm.DB
-	GVA_REDIS     redis.UniversalClient
+	IADMIN_DB     *gorm.DB
+	IADMIN_DBList map[string]*gorm.DB
+	IADMIN_REDIS  redis.UniversalClient
 	GVA_REDISList map[string]redis.UniversalClient
 	GVA_MONGO     *qmgo.QmgoClient
-	GVA_CONFIG    config.Server
-	GVA_VP        *viper.Viper
-	// GVA_LOG    *oplogging.Logger
-	GVA_LOG                 *zap.Logger
-	GVA_Timer               timer.Timer = timer.NewTimerTask()
+	IADMIN_CONFIG config.Server
+	IADMIN_VP     *viper.Viper
+	// IADMIN_LOG    *oplogging.Logger
+	IADMIN_LOG              *zap.Logger
+	IADMIN_Timer            timer.Timer = timer.NewTimerTask()
 	GVA_Concurrency_Control             = &singleflight.Group{}
-	GVA_ROUTERS             gin.RoutesInfo
-	GVA_ACTIVE_DBNAME       *string
-	GVA_MCP_SERVER          *server.MCPServer
+	IADMIN_ROUTERS          gin.RoutesInfo
+	IADMIN_ACTIVE_DBNAME    *string
+	IADMIN_MCP_SERVER       *server.MCPServer
 	BlackCache              local_cache.Cache
 	lock                    sync.RWMutex
 )
@@ -45,14 +46,14 @@ var (
 func GetGlobalDBByDBName(dbname string) *gorm.DB {
 	lock.RLock()
 	defer lock.RUnlock()
-	return GVA_DBList[dbname]
+	return IADMIN_DBList[dbname]
 }
 
 // MustGetGlobalDBByDBName 通过名称获取db 如果不存在则panic
 func MustGetGlobalDBByDBName(dbname string) *gorm.DB {
 	lock.RLock()
 	defer lock.RUnlock()
-	db, ok := GVA_DBList[dbname]
+	db, ok := IADMIN_DBList[dbname]
 	if !ok || db == nil {
 		panic("db no init")
 	}

@@ -13,9 +13,9 @@ import (
 
 	"github.com/icosmos-space/iadmin/server/utils"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +36,7 @@ func OperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				global.GVA_LOG.Error("read body from request error:", zap.Error(err))
+				global.IADMIN_LOG.Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 			}
@@ -112,8 +112,8 @@ func OperationRecord() gin.HandlerFunc {
 				record.Body = "超出记录长度"
 			}
 		}
-		if err := global.GVA_DB.Create(&record).Error; err != nil {
-			global.GVA_LOG.Error("create operation record error:", zap.Error(err))
+		if err := global.IADMIN_DB.Create(&record).Error; err != nil {
+			global.IADMIN_LOG.Error("create operation record error:", zap.Error(err))
 		}
 	}
 }

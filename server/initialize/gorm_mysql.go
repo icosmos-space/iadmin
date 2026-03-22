@@ -1,10 +1,10 @@
 package initialize
 
 import (
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/icosmos-space/iadmin/server/config"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/initialize/internal"
-	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -14,7 +14,7 @@ import (
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [ByteZhou-2018](https://github.com/ByteZhou-2018)
 func GormMysql() *gorm.DB {
-	m := global.GVA_CONFIG.Mysql
+	m := global.IADMIN_CONFIG.Mysql
 	return initMysqlDatabase(m)
 }
 

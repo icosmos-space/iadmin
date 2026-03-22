@@ -2,11 +2,12 @@ package system
 
 import (
 	"fmt"
+
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/mcp/client"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
-	"github.com/gin-gonic/gin"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -30,7 +31,7 @@ func (a *AutoCodeTemplateApi) MCP(c *gin.Context) {
 	toolFilePath, err := autoCodeTemplateService.CreateMcp(c.Request.Context(), info)
 	if err != nil {
 		response.FailWithMessage("创建失败", c)
-		global.GVA_LOG.Error(err.Error())
+		global.IADMIN_LOG.Error(err.Error())
 		return
 	}
 	response.OkWithMessage("创建成功,MCP Tool路径:"+toolFilePath, c)
@@ -47,9 +48,9 @@ func (a *AutoCodeTemplateApi) MCP(c *gin.Context) {
 // @Router    /autoCode/mcpList [post]
 func (a *AutoCodeTemplateApi) MCPList(c *gin.Context) {
 
-	baseUrl := fmt.Sprintf("http://127.0.0.1:%d%s", global.GVA_CONFIG.System.Addr, global.GVA_CONFIG.MCP.SSEPath)
+	baseUrl := fmt.Sprintf("http://127.0.0.1:%d%s", global.IADMIN_CONFIG.System.Addr, global.IADMIN_CONFIG.MCP.SSEPath)
 
-	testClient, err := client.NewClient(baseUrl, "testClient", "v1.0.0", global.GVA_CONFIG.MCP.Name)
+	testClient, err := client.NewClient(baseUrl, "testClient", "v1.0.0", global.IADMIN_CONFIG.MCP.Name)
 	defer testClient.Close()
 	toolsRequest := mcp.ListToolsRequest{}
 
@@ -57,13 +58,13 @@ func (a *AutoCodeTemplateApi) MCPList(c *gin.Context) {
 
 	if err != nil {
 		response.FailWithMessage("创建失败", c)
-		global.GVA_LOG.Error(err.Error())
+		global.IADMIN_LOG.Error(err.Error())
 		return
 	}
 
 	mcpServerConfig := map[string]interface{}{
 		"mcpServers": map[string]interface{}{
-			global.GVA_CONFIG.MCP.Name: map[string]string{
+			global.IADMIN_CONFIG.MCP.Name: map[string]string{
 				"url": baseUrl,
 			},
 		},
@@ -97,8 +98,8 @@ func (a *AutoCodeTemplateApi) MCPTest(c *gin.Context) {
 	}
 
 	// 创建MCP客户端
-	baseUrl := fmt.Sprintf("http://127.0.0.1:%d%s", global.GVA_CONFIG.System.Addr, global.GVA_CONFIG.MCP.SSEPath)
-	testClient, err := client.NewClient(baseUrl, "testClient", "v1.0.0", global.GVA_CONFIG.MCP.Name)
+	baseUrl := fmt.Sprintf("http://127.0.0.1:%d%s", global.IADMIN_CONFIG.System.Addr, global.IADMIN_CONFIG.MCP.SSEPath)
+	testClient, err := client.NewClient(baseUrl, "testClient", "v1.0.0", global.IADMIN_CONFIG.MCP.Name)
 	if err != nil {
 		response.FailWithMessage("创建MCP客户端失败:"+err.Error(), c)
 		return

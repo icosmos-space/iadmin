@@ -3,6 +3,9 @@ package initialize
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/initialize/internal"
 	"github.com/icosmos-space/iadmin/server/utils"
@@ -11,8 +14,6 @@ import (
 	"github.com/qiniu/qmgo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	option "go.mongodb.org/mongo-driver/mongo/options"
-	"sort"
-	"strings"
 )
 
 var Mongo = new(mongo)
@@ -41,24 +42,24 @@ func (m *mongo) Indexes(ctx context.Context) error {
 
 func (m *mongo) Initialization() error {
 	var opts []options.ClientOptions
-	if global.GVA_CONFIG.Mongo.IsZap {
+	if global.IADMIN_CONFIG.Mongo.IsZap {
 		opts = internal.Mongo.GetClientOptions()
 	}
 	ctx := context.Background()
 	config := &qmgo.Config{
-		Uri:              global.GVA_CONFIG.Mongo.Uri(),
-		Coll:             global.GVA_CONFIG.Mongo.Coll,
-		Database:         global.GVA_CONFIG.Mongo.Database,
-		MinPoolSize:      &global.GVA_CONFIG.Mongo.MinPoolSize,
-		MaxPoolSize:      &global.GVA_CONFIG.Mongo.MaxPoolSize,
-		SocketTimeoutMS:  &global.GVA_CONFIG.Mongo.SocketTimeoutMs,
-		ConnectTimeoutMS: &global.GVA_CONFIG.Mongo.ConnectTimeoutMs,
+		Uri:              global.IADMIN_CONFIG.Mongo.Uri(),
+		Coll:             global.IADMIN_CONFIG.Mongo.Coll,
+		Database:         global.IADMIN_CONFIG.Mongo.Database,
+		MinPoolSize:      &global.IADMIN_CONFIG.Mongo.MinPoolSize,
+		MaxPoolSize:      &global.IADMIN_CONFIG.Mongo.MaxPoolSize,
+		SocketTimeoutMS:  &global.IADMIN_CONFIG.Mongo.SocketTimeoutMs,
+		ConnectTimeoutMS: &global.IADMIN_CONFIG.Mongo.ConnectTimeoutMs,
 	}
-	if global.GVA_CONFIG.Mongo.Username != "" && global.GVA_CONFIG.Mongo.Password != "" {
+	if global.IADMIN_CONFIG.Mongo.Username != "" && global.IADMIN_CONFIG.Mongo.Password != "" {
 		config.Auth = &qmgo.Credential{
-			Username:   global.GVA_CONFIG.Mongo.Username,
-			Password:   global.GVA_CONFIG.Mongo.Password,
-			AuthSource: global.GVA_CONFIG.Mongo.AuthSource,
+			Username:   global.IADMIN_CONFIG.Mongo.Username,
+			Password:   global.IADMIN_CONFIG.Mongo.Password,
+			AuthSource: global.IADMIN_CONFIG.Mongo.AuthSource,
 		}
 	}
 	client, err := qmgo.Open(ctx, config, opts...)

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
-	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type JWT struct {
@@ -25,13 +25,13 @@ var (
 
 func NewJWT() *JWT {
 	return &JWT{
-		[]byte(global.GVA_CONFIG.JWT.SigningKey),
+		[]byte(global.IADMIN_CONFIG.JWT.SigningKey),
 	}
 }
 
 func (j *JWT) CreateClaims(baseClaims request.BaseClaims) request.CustomClaims {
-	bf, _ := ParseDuration(global.GVA_CONFIG.JWT.BufferTime)
-	ep, _ := ParseDuration(global.GVA_CONFIG.JWT.ExpiresTime)
+	bf, _ := ParseDuration(global.IADMIN_CONFIG.JWT.BufferTime)
+	ep, _ := ParseDuration(global.IADMIN_CONFIG.JWT.ExpiresTime)
 	claims := request.CustomClaims{
 		BaseClaims: baseClaims,
 		BufferTime: int64(bf / time.Second), // 缓冲时间1天 缓冲时间内会获得新的token刷新令牌 此时一个用户会存在两个有效令牌 但是前端只留一个 另一个会丢失
@@ -39,7 +39,7 @@ func (j *JWT) CreateClaims(baseClaims request.BaseClaims) request.CustomClaims {
 			Audience:  jwt.ClaimStrings{"GVA"},                   // 受众
 			NotBefore: jwt.NewNumericDate(time.Now().Add(-1000)), // 签名生效时间
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ep)),    // 过期时间 7天  配置文件
-			Issuer:    global.GVA_CONFIG.JWT.Issuer,              // 签名的发行者
+			Issuer:    global.IADMIN_CONFIG.JWT.Issuer,           // 签名的发行者
 		},
 	}
 	return claims
@@ -95,11 +95,11 @@ func (j *JWT) ParseToken(tokenString string) (*request.CustomClaims, error) {
 
 func SetRedisJWT(jwt string, userName string) (err error) {
 	// 此处过期时间等于jwt过期时间
-	dr, err := ParseDuration(global.GVA_CONFIG.JWT.ExpiresTime)
+	dr, err := ParseDuration(global.IADMIN_CONFIG.JWT.ExpiresTime)
 	if err != nil {
 		return err
 	}
 	timer := dr
-	err = global.GVA_REDIS.Set(context.Background(), userName, jwt, timer).Err()
+	err = global.IADMIN_REDIS.Set(context.Background(), userName, jwt, timer).Err()
 	return err
 }

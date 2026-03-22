@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+
 	"github.com/icosmos-space/iadmin/server/config"
 	"github.com/icosmos-space/iadmin/server/global"
 	"gorm.io/gorm/logger"
@@ -26,15 +27,15 @@ func (c *Writer) Printf(message string, data ...any) {
 	if c.config.LogZap {
 		switch c.config.LogLevel() {
 		case logger.Silent:
-			global.GVA_LOG.Debug(fmt.Sprintf(message, data...))
+			global.IADMIN_LOG.Debug(fmt.Sprintf(message, data...))
 		case logger.Error:
-			global.GVA_LOG.Error(fmt.Sprintf(message, data...))
+			global.IADMIN_LOG.Error(fmt.Sprintf(message, data...))
 		case logger.Warn:
-			global.GVA_LOG.Warn(fmt.Sprintf(message, data...))
+			global.IADMIN_LOG.Warn(fmt.Sprintf(message, data...))
 		case logger.Info:
-			global.GVA_LOG.Info(fmt.Sprintf(message, data...))
+			global.IADMIN_LOG.Info(fmt.Sprintf(message, data...))
 		default:
-			global.GVA_LOG.Info(fmt.Sprintf(message, data...))
+			global.IADMIN_LOG.Info(fmt.Sprintf(message, data...))
 		}
 		return
 	}

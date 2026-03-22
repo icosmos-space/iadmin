@@ -9303,8 +9303,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Gin-Vue-Admin Swagger API接口文档",
-	Description:      "使用gin+vue进行极速开发的全栈开发基础平台",
+	Title:            "iAdmin Swagger API接口文档",
+	Description:      "使用gin+vue进行极速开发的全栈开发基础平台(fork from Gin-Vue-Admin)",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

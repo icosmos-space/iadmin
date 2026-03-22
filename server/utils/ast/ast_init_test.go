@@ -1,11 +1,12 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func init() {
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("../../../")
-	global.GVA_CONFIG.AutoCode.Server = "server"
+	global.IADMIN_CONFIG.AutoCode.Root, _ = filepath.Abs("../../../")
+	global.IADMIN_CONFIG.AutoCode.Server = "server"
 }

@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPackageInitializeGorm_Injection(t *testing.T) {
@@ -24,7 +25,7 @@ func TestPackageInitializeGorm_Injection(t *testing.T) {
 			name: "测试 &example.ExaFileUploadAndDownload{} 注入",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaFileUploadAndDownload",
 				PackageName: "example",
@@ -35,7 +36,7 @@ func TestPackageInitializeGorm_Injection(t *testing.T) {
 			name: "测试 &example.ExaCustomer{} 注入",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaCustomer",
 				PackageName: "example",
@@ -46,7 +47,7 @@ func TestPackageInitializeGorm_Injection(t *testing.T) {
 			name: "测试 new(example.ExaFileUploadAndDownload) 注入",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaFileUploadAndDownload",
 				PackageName: "example",
@@ -57,7 +58,7 @@ func TestPackageInitializeGorm_Injection(t *testing.T) {
 			name: "测试 new(example.ExaCustomer) 注入",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaCustomer",
 				PackageName: "example",
@@ -106,7 +107,7 @@ func TestPackageInitializeGorm_Rollback(t *testing.T) {
 			name: "测试 &example.ExaFileUploadAndDownload{} 回滚",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaFileUploadAndDownload",
 				PackageName: "example",
@@ -117,7 +118,7 @@ func TestPackageInitializeGorm_Rollback(t *testing.T) {
 			name: "测试 &example.ExaCustomer{} 回滚",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaCustomer",
 				PackageName: "example",
@@ -128,7 +129,7 @@ func TestPackageInitializeGorm_Rollback(t *testing.T) {
 			name: "测试 new(example.ExaFileUploadAndDownload) 回滚",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaFileUploadAndDownload",
 				PackageName: "example",
@@ -139,7 +140,7 @@ func TestPackageInitializeGorm_Rollback(t *testing.T) {
 			name: "测试 new(example.ExaCustomer) 回滚",
 			fields: fields{
 				Type:        TypePackageInitializeGorm,
-				Path:        filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
+				Path:        filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "initialize", "gorm_biz.go"),
 				ImportPath:  `"github.com/icosmos-space/iadmin/server/model/example"`,
 				StructName:  "ExaCustomer",
 				PackageName: "example",

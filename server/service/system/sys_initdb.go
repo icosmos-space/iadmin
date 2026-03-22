@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sort"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	"gorm.io/gorm"
-	"sort"
 )
 
 const (
@@ -121,7 +122,7 @@ func (initDBService *InitDBService) InitDB(conf request.InitDB) (err error) {
 	}
 
 	db := ctx.Value("db").(*gorm.DB)
-	global.GVA_DB = db
+	global.IADMIN_DB = db
 
 	if err = initHandler.InitTables(ctx, initializers); err != nil {
 		return err

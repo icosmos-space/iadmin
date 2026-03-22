@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/request"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
@@ -14,7 +15,6 @@ import (
 	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 	"github.com/icosmos-space/iadmin/server/service"
 	"github.com/icosmos-space/iadmin/server/utils"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -61,21 +61,21 @@ var sysExportTemplateService = service.ServiceGroupApp.SystemServiceGroup.SysExp
 // @Success  200  {object}  response.Response{data=map[string]string} "获取成功"
 // @Router   /sysExportTemplate/previewSQL [get]
 func (sysExportTemplateApi *SysExportTemplateApi) PreviewSQL(c *gin.Context) {
-    templateID := c.Query("templateID")
-    if templateID == "" {
-        response.FailWithMessage("模板ID不能为空", c)
-        return
-    }
+	templateID := c.Query("templateID")
+	if templateID == "" {
+		response.FailWithMessage("模板ID不能为空", c)
+		return
+	}
 
-    // 直接复用导出接口的参数组织方式：使用 URL Query，其中 params 为内部编码的查询字符串
-    queryParams := c.Request.URL.Query()
+	// 直接复用导出接口的参数组织方式：使用 URL Query，其中 params 为内部编码的查询字符串
+	queryParams := c.Request.URL.Query()
 
-    if sqlPreview, err := sysExportTemplateService.PreviewSQL(templateID, queryParams); err != nil {
-        global.GVA_LOG.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败", c)
-    } else {
-        response.OkWithData(gin.H{"sql": sqlPreview}, c)
-    }
+	if sqlPreview, err := sysExportTemplateService.PreviewSQL(templateID, queryParams); err != nil {
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithData(gin.H{"sql": sqlPreview}, c)
+	}
 }
 
 // CreateSysExportTemplate 创建导出模板
@@ -102,7 +102,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) CreateSysExportTemplate(c *gin
 		return
 	}
 	if err := sysExportTemplateService.CreateSysExportTemplate(&sysExportTemplate); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -126,7 +126,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) DeleteSysExportTemplate(c *gin
 		return
 	}
 	if err := sysExportTemplateService.DeleteSysExportTemplate(sysExportTemplate); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -150,7 +150,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) DeleteSysExportTemplateByIds(c
 		return
 	}
 	if err := sysExportTemplateService.DeleteSysExportTemplateByIds(IDS); err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -181,7 +181,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) UpdateSysExportTemplate(c *gin
 		return
 	}
 	if err := sysExportTemplateService.UpdateSysExportTemplate(sysExportTemplate); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -205,7 +205,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) FindSysExportTemplate(c *gin.C
 		return
 	}
 	if resysExportTemplate, err := sysExportTemplateService.GetSysExportTemplate(sysExportTemplate.ID); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"resysExportTemplate": resysExportTemplate}, c)
@@ -229,7 +229,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) GetSysExportTemplateList(c *gi
 		return
 	}
 	if list, total, err := sysExportTemplateService.GetSysExportTemplateInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
@@ -298,7 +298,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportExcelByToken(c *gin.Cont
 	tokenMutex.RUnlock()
 
 	if !exists || time.Now().After(expiry) {
-		global.GVA_LOG.Error("导出token无效或已过期!")
+		global.IADMIN_LOG.Error("导出token无效或已过期!")
 		response.FailWithMessage("导出token无效或已过期", c)
 		return
 	}
@@ -306,7 +306,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportExcelByToken(c *gin.Cont
 	// 从token获取参数
 	exportParams, ok := exportParamsRaw.(map[string]interface{})
 	if !ok {
-		global.GVA_LOG.Error("解析导出参数失败!")
+		global.IADMIN_LOG.Error("解析导出参数失败!")
 		response.FailWithMessage("解析导出参数失败", c)
 		return
 	}
@@ -323,7 +323,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportExcelByToken(c *gin.Cont
 
 	// 导出
 	if file, name, err := sysExportTemplateService.ExportExcel(templateID, queryParams); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name+utils.RandomString(6)+".xlsx"))
@@ -387,7 +387,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportTemplateByToken(c *gin.C
 	tokenMutex.RUnlock()
 
 	if !exists || time.Now().After(expiry) {
-		global.GVA_LOG.Error("导出token无效或已过期!")
+		global.IADMIN_LOG.Error("导出token无效或已过期!")
 		response.FailWithMessage("导出token无效或已过期", c)
 		return
 	}
@@ -395,7 +395,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportTemplateByToken(c *gin.C
 	// 从token获取参数
 	exportParams, ok := exportParamsRaw.(map[string]interface{})
 	if !ok {
-		global.GVA_LOG.Error("解析导出参数失败!")
+		global.IADMIN_LOG.Error("解析导出参数失败!")
 		response.FailWithMessage("解析导出参数失败", c)
 		return
 	}
@@ -403,7 +403,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportTemplateByToken(c *gin.C
 	// 检查是否为模板导出
 	isTemplate, _ := exportParams["isTemplate"].(bool)
 	if !isTemplate {
-		global.GVA_LOG.Error("token类型错误!")
+		global.IADMIN_LOG.Error("token类型错误!")
 		response.FailWithMessage("token类型错误", c)
 		return
 	}
@@ -419,7 +419,7 @@ func (sysExportTemplateApi *SysExportTemplateApi) ExportTemplateByToken(c *gin.C
 
 	// 导出模板
 	if file, name, err := sysExportTemplateService.ExportTemplate(templateID); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name+"模板.xlsx"))
@@ -443,12 +443,12 @@ func (sysExportTemplateApi *SysExportTemplateApi) ImportExcel(c *gin.Context) {
 	}
 	file, err := c.FormFile("file")
 	if err != nil {
-		global.GVA_LOG.Error("文件获取失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("文件获取失败!", zap.Error(err))
 		response.FailWithMessage("文件获取失败", c)
 		return
 	}
 	if err := sysExportTemplateService.ImportExcel(templateID, file); err != nil {
-		global.GVA_LOG.Error(err.Error(), zap.Error(err))
+		global.IADMIN_LOG.Error(err.Error(), zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("导入成功", c)

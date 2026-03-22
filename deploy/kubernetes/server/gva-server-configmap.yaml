@@ -3,12 +3,12 @@ kind: ConfigMap
 metadata:
   name: config.yaml
   annotations:
-    flipped-aurora/gin-vue-admin: backend
-    github: "https://github.com/flipped-aurora/gin-vue-admin.git"
+    icosmos-space/iadmin: backend
+    github: "https://github.com/icosmos-space/iadmin.git"
     app.kubernetes.io/version: 0.0.1
   labels:
-    app: gva-server
-    version: gva-vue3
+    app: iadmin-server
+    version: iadmin-vue3
 data:
   config.yaml: |
     # github.com/icosmos-space/iadmin/server Global Configuration

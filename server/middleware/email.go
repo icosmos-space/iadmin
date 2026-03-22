@@ -9,9 +9,9 @@ import (
 	"github.com/icosmos-space/iadmin/server/plugin/email/utils"
 	utils2 "github.com/icosmos-space/iadmin/server/utils"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +24,7 @@ func ErrorToEmail() gin.HandlerFunc {
 		} else {
 			id, _ := strconv.Atoi(c.Request.Header.Get("x-user-id"))
 			var u system.SysUser
-			err := global.GVA_DB.Where("id = ?", id).First(&u).Error
+			err := global.IADMIN_DB.Where("id = ?", id).First(&u).Error
 			if err != nil {
 				username = "Unknown"
 			}
@@ -51,7 +51,7 @@ func ErrorToEmail() gin.HandlerFunc {
 		if status != 200 {
 			subject := username + "" + record.Ip + "调用了" + record.Path + "报错了"
 			if err := utils.ErrorToEmail(subject, str); err != nil {
-				global.GVA_LOG.Error("ErrorToEmail Failed, err:", zap.Error(err))
+				global.IADMIN_LOG.Error("ErrorToEmail Failed, err:", zap.Error(err))
 			}
 		}
 	}

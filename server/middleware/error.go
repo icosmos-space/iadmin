@@ -10,10 +10,10 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/service"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -35,7 +35,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					global.GVA_LOG.Error(c.Request.URL.Path,
+					global.IADMIN_LOG.Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -54,7 +54,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 						Info:  &info,
 						Level: level,
 					})
-					global.GVA_LOG.Error("[Recovery from panic]",
+					global.IADMIN_LOG.Error("[Recovery from panic]",
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -67,7 +67,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 						Info:  &info,
 						Level: level,
 					})
-					global.GVA_LOG.Error("[Recovery from panic]",
+					global.IADMIN_LOG.Error("[Recovery from panic]",
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)

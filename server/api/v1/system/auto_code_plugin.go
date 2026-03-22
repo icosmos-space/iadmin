@@ -5,12 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/model/system/request"
 	systemRes "github.com/icosmos-space/iadmin/server/model/system/response"
 	"github.com/icosmos-space/iadmin/server/plugin/plugin-tool/utils"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -68,7 +68,7 @@ func (a *AutoCodePluginApi) Packaged(c *gin.Context) {
 	plugName := c.Query("plugName")
 	zipPath, err := autoCodePluginService.PubPlug(plugName)
 	if err != nil {
-		global.GVA_LOG.Error("打包失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("打包失败!", zap.Error(err))
 		response.FailWithMessage("打包失败"+err.Error(), c)
 		return
 	}
@@ -92,7 +92,7 @@ func (a *AutoCodePluginApi) InitMenu(c *gin.Context) {
 	}
 	err = autoCodePluginService.InitMenu(menuInfo)
 	if err != nil {
-		global.GVA_LOG.Error("创建初始化Menu失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建初始化Menu失败!", zap.Error(err))
 		response.FailWithMessage("创建初始化Menu失败"+err.Error(), c)
 		return
 	}
@@ -116,7 +116,7 @@ func (a *AutoCodePluginApi) InitAPI(c *gin.Context) {
 	}
 	err = autoCodePluginService.InitAPI(apiInfo)
 	if err != nil {
-		global.GVA_LOG.Error("创建初始化API失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建初始化API失败!", zap.Error(err))
 		response.FailWithMessage("创建初始化API失败"+err.Error(), c)
 		return
 	}
@@ -140,7 +140,7 @@ func (a *AutoCodePluginApi) InitDictionary(c *gin.Context) {
 	}
 	err = autoCodePluginService.InitDictionary(dictInfo)
 	if err != nil {
-		global.GVA_LOG.Error("创建初始化Dictionary失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("创建初始化Dictionary失败!", zap.Error(err))
 		response.FailWithMessage("创建初始化Dictionary失败"+err.Error(), c)
 		return
 	}
@@ -155,8 +155,8 @@ func (a *AutoCodePluginApi) InitDictionary(c *gin.Context) {
 // @Success   200   {object}  response.Response{data=[]systemRes.PluginInfo}  "获取插件列表成功"
 // @Router    /autoCode/getPluginList [get]
 func (a *AutoCodePluginApi) GetPluginList(c *gin.Context) {
-	serverDir := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin")
-	webDir := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "plugin")
+	serverDir := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin")
+	webDir := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Web, "plugin")
 
 	serverEntries, _ := os.ReadDir(serverDir)
 	webEntries, _ := os.ReadDir(webDir)
@@ -210,7 +210,7 @@ func (a *AutoCodePluginApi) Remove(c *gin.Context) {
 	pluginType := c.Query("pluginType")
 	err := autoCodePluginService.Remove(pluginName, pluginType)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.IADMIN_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败"+err.Error(), c)
 		return
 	}

@@ -4,25 +4,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+
+	"github.com/goccy/go-json"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common"
 	commonResp "github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/utils/request"
-	"github.com/goccy/go-json"
-	"io"
-	"strings"
 )
 
 // LLMAuto 调用大模型服务，返回生成结果数据
 // 入参为通用 JSONMap，需包含 mode（例如 ai/butler/eye/painter 等）以及业务 prompt/payload
 func (s *AutoCodeService) LLMAuto(ctx context.Context, llm common.JSONMap) (interface{}, error) {
-	if global.GVA_CONFIG.AutoCode.AiPath == "" {
+	if global.IADMIN_CONFIG.AutoCode.AiPath == "" {
 		return nil, errors.New("请先前往插件市场个人中心获取AiPath并填入config.yaml中")
 	}
 
 	// 构建调用路径：{AiPath} 中的 {FUNC} 由 mode 替换
 	mode := fmt.Sprintf("%v", llm["mode"]) // 统一转字符串，避免 nil 造成路径异常
-	path := strings.ReplaceAll(global.GVA_CONFIG.AutoCode.AiPath, "{FUNC}", mode)
+	path := strings.ReplaceAll(global.IADMIN_CONFIG.AutoCode.AiPath, "{FUNC}", mode)
 
 	res, err := request.HttpRequest(
 		path,

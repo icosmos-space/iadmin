@@ -12,35 +12,35 @@ import (
 )
 
 func Gorm() *gorm.DB {
-	switch global.GVA_CONFIG.System.DbType {
+	switch global.IADMIN_CONFIG.System.DbType {
 	case "mysql":
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Mysql.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Mysql.Dbname
 		return GormMysql()
 	case "pgsql":
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Pgsql.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Pgsql.Dbname
 		return GormPgSql()
 	case "oracle":
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Oracle.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Oracle.Dbname
 		return GormOracle()
 	case "mssql":
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Mssql.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Mssql.Dbname
 		return GormMssql()
 	case "sqlite":
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Sqlite.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Sqlite.Dbname
 		return GormSqlite()
 	default:
-		global.GVA_ACTIVE_DBNAME = &global.GVA_CONFIG.Mysql.Dbname
+		global.IADMIN_ACTIVE_DBNAME = &global.IADMIN_CONFIG.Mysql.Dbname
 		return GormMysql()
 	}
 }
 
 func RegisterTables() {
-	if global.GVA_CONFIG.System.DisableAutoMigrate {
-		global.GVA_LOG.Info("auto-migrate is disabled, skipping table registration")
+	if global.IADMIN_CONFIG.System.DisableAutoMigrate {
+		global.IADMIN_LOG.Info("auto-migrate is disabled, skipping table registration")
 		return
 	}
 
-	db := global.GVA_DB
+	db := global.IADMIN_DB
 	err := db.AutoMigrate(
 
 		system.SysApi{},
@@ -73,15 +73,15 @@ func RegisterTables() {
 		example.ExaAttachmentCategory{},
 	)
 	if err != nil {
-		global.GVA_LOG.Error("register table failed", zap.Error(err))
+		global.IADMIN_LOG.Error("register table failed", zap.Error(err))
 		os.Exit(0)
 	}
 
 	err = bizModel()
 
 	if err != nil {
-		global.GVA_LOG.Error("register biz_table failed", zap.Error(err))
+		global.IADMIN_LOG.Error("register biz_table failed", zap.Error(err))
 		os.Exit(0)
 	}
-	global.GVA_LOG.Info("register table success")
+	global.IADMIN_LOG.Info("register table success")
 }

@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/system"
@@ -45,7 +46,7 @@ func RegisterApis(apis ...system.SysApi) {
 		rw.Unlock()
 	}
 
-	err := global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err := global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		for _, api := range apis {
 			err := tx.Model(system.SysApi{}).Where("path = ? AND method = ? AND api_group = ? ", api.Path, api.Method, api.ApiGroup).FirstOrCreate(&api).Error
 			if err != nil {
@@ -70,7 +71,7 @@ func RegisterMenus(menus ...system.SysBaseMenu) {
 
 	parentMenu := menus[0]
 	otherMenus := menus[1:]
-	err := global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err := global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(system.SysBaseMenu{}).Where("name = ? ", parentMenu.Name).FirstOrCreate(&parentMenu).Error
 		if err != nil {
 			zap.L().Error("注册菜单失败", zap.Error(err))
@@ -101,7 +102,7 @@ func RegisterDictionaries(dictionaries ...system.SysDictionary) {
 		rw.Unlock()
 	}
 
-	err := global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err := global.IADMIN_DB.Transaction(func(tx *gorm.DB) error {
 		for _, dict := range dictionaries {
 			details := dict.SysDictionaryDetails
 			dict.SysDictionaryDetails = nil
@@ -135,4 +136,3 @@ func GetPluginData(pluginName string) ([]system.SysApi, []system.SysBaseMenu, []
 	defer rw.Unlock()
 	return ApiMap[pluginName], MenuMap[pluginName], DictMap[pluginName]
 }
-

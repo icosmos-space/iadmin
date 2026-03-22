@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	model "github.com/icosmos-space/iadmin/server/model/system"
 	"os"
 	"path/filepath"
 	"strings"
+
+	model "github.com/icosmos-space/iadmin/server/model/system"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -119,13 +120,13 @@ func (g *GVAAnalyzer) Handle(ctx context.Context, request mcp.CallToolRequest) (
 func (g *GVAAnalyzer) performAnalysis(ctx context.Context, req AnalyzeRequest) (*AnalyzeResponse, error) {
 	// 1. 获取数据库中的包信息
 	var packages []model.SysAutoCodePackage
-	if err := global.GVA_DB.Find(&packages).Error; err != nil {
+	if err := global.IADMIN_DB.Find(&packages).Error; err != nil {
 		return nil, fmt.Errorf("获取包信息失败: %v", err)
 	}
 
 	// 2. 获取历史记录
 	var histories []model.SysAutoCodeHistory
-	if err := global.GVA_DB.Find(&histories).Error; err != nil {
+	if err := global.IADMIN_DB.Find(&histories).Error; err != nil {
 		return nil, fmt.Errorf("获取历史记录失败: %v", err)
 	}
 
@@ -141,21 +142,21 @@ func (g *GVAAnalyzer) performAnalysis(ctx context.Context, req AnalyzeRequest) (
 	for _, pkg := range packages {
 		isEmpty, err := g.isPackageFolderEmpty(pkg.PackageName, pkg.Template)
 		if err != nil {
-			global.GVA_LOG.Warn(fmt.Sprintf("检查包 %s 是否为空时出错: %v", pkg.PackageName, err))
+			global.IADMIN_LOG.Warn(fmt.Sprintf("检查包 %s 是否为空时出错: %v", pkg.PackageName, err))
 			continue
 		}
 
 		if isEmpty {
 			// 删除空包文件夹
 			if err := g.removeEmptyPackageFolder(pkg.PackageName, pkg.Template); err != nil {
-				global.GVA_LOG.Warn(fmt.Sprintf("删除空包文件夹 %s 失败: %v", pkg.PackageName, err))
+				global.IADMIN_LOG.Warn(fmt.Sprintf("删除空包文件夹 %s 失败: %v", pkg.PackageName, err))
 			} else {
 				cleanupInfo.DeletedPackages = append(cleanupInfo.DeletedPackages, pkg.PackageName)
 			}
 
 			// 删除数据库记录
-			if err := global.GVA_DB.Delete(&pkg).Error; err != nil {
-				global.GVA_LOG.Warn(fmt.Sprintf("删除包数据库记录 %s 失败: %v", pkg.PackageName, err))
+			if err := global.IADMIN_DB.Delete(&pkg).Error; err != nil {
+				global.IADMIN_LOG.Warn(fmt.Sprintf("删除包数据库记录 %s 失败: %v", pkg.PackageName, err))
 			}
 
 			// 收集相关的历史记录ID
@@ -184,22 +185,22 @@ func (g *GVAAnalyzer) performAnalysis(ctx context.Context, req AnalyzeRequest) (
 
 	// 删除脏历史记录
 	if len(dirtyHistoryIDs) > 0 {
-		if err := global.GVA_DB.Delete(&model.SysAutoCodeHistory{}, "id IN ?", dirtyHistoryIDs).Error; err != nil {
-			global.GVA_LOG.Warn(fmt.Sprintf("删除脏历史记录失败: %v", err))
+		if err := global.IADMIN_DB.Delete(&model.SysAutoCodeHistory{}, "id IN ?", dirtyHistoryIDs).Error; err != nil {
+			global.IADMIN_LOG.Warn(fmt.Sprintf("删除脏历史记录失败: %v", err))
 		} else {
-			global.GVA_LOG.Info(fmt.Sprintf("成功删除 %d 条脏历史记录", len(dirtyHistoryIDs)))
+			global.IADMIN_LOG.Info(fmt.Sprintf("成功删除 %d 条脏历史记录", len(dirtyHistoryIDs)))
 		}
 
 		// 清理相关的API和菜单记录
 		if err := g.cleanupRelatedApiAndMenus(dirtyHistoryIDs); err != nil {
-			global.GVA_LOG.Warn(fmt.Sprintf("清理相关API和菜单记录失败: %v", err))
+			global.IADMIN_LOG.Warn(fmt.Sprintf("清理相关API和菜单记录失败: %v", err))
 		}
 	}
 
 	// 6. 扫描预设计模块
 	predesignedModules, err := g.scanPredesignedModules()
 	if err != nil {
-		global.GVA_LOG.Warn(fmt.Sprintf("扫描预设计模块失败: %v", err))
+		global.IADMIN_LOG.Warn(fmt.Sprintf("扫描预设计模块失败: %v", err))
 		predesignedModules = []PredesignedModuleInfo{} // 设置为空列表，不影响主流程
 	}
 
@@ -250,9 +251,9 @@ func (g *GVAAnalyzer) performAnalysis(ctx context.Context, req AnalyzeRequest) (
 	}
 
 	dictionaries := []DictionaryPre{} // 这里可以根据需要填充字典信息
-	err = global.GVA_DB.Table("sys_dictionaries").Find(&dictionaries, "deleted_at is null").Error
+	err = global.IADMIN_DB.Table("sys_dictionaries").Find(&dictionaries, "deleted_at is null").Error
 	if err != nil {
-		global.GVA_LOG.Warn(fmt.Sprintf("获取字典信息失败: %v", err))
+		global.IADMIN_LOG.Warn(fmt.Sprintf("获取字典信息失败: %v", err))
 		dictionaries = []DictionaryPre{} // 设置为空列表，不影响主流程
 	}
 
@@ -271,9 +272,9 @@ func (g *GVAAnalyzer) isPackageFolderEmpty(packageName, template string) (bool, 
 	// 根据模板类型确定基础路径
 	var basePath string
 	if template == "plugin" {
-		basePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", packageName)
+		basePath = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", packageName)
 	} else {
-		basePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", packageName)
+		basePath = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", packageName)
 	}
 
 	// 检查文件夹是否存在
@@ -321,14 +322,14 @@ func (g *GVAAnalyzer) hasGoFilesRecursive(dirPath string) (bool, error) {
 func (g *GVAAnalyzer) removeEmptyPackageFolder(packageName, template string) error {
 	var basePath string
 	if template == "plugin" {
-		basePath = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", packageName)
+		basePath = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", packageName)
 	} else {
 		// 对于package类型，需要删除多个目录
 		paths := []string{
-			filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", packageName),
-			filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "model", packageName),
-			filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "router", packageName),
-			filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service", packageName),
+			filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", packageName),
+			filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "model", packageName),
+			filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "router", packageName),
+			filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service", packageName),
 		}
 		for _, path := range paths {
 			if err := g.removeDirectoryIfExists(path); err != nil {
@@ -369,7 +370,7 @@ func (g *GVAAnalyzer) cleanupRelatedApiAndMenus(historyIDs []uint) error {
 
 	// 这里可以根据需要实现具体的API和菜单清理逻辑
 	// 由于涉及到具体的业务逻辑，这里只做日志记录
-	global.GVA_LOG.Info(fmt.Sprintf("清理历史记录ID %v 相关的API和菜单记录", historyIDs))
+	global.IADMIN_LOG.Info(fmt.Sprintf("清理历史记录ID %v 相关的API和菜单记录", historyIDs))
 
 	// 可以调用service层的相关方法进行清理
 	// 例如：service.ServiceGroupApp.SystemApiService.DeleteApisByIds(historyIDs)
@@ -381,7 +382,7 @@ func (g *GVAAnalyzer) cleanupRelatedApiAndMenus(historyIDs []uint) error {
 // scanPredesignedModules 扫描预设计模块
 func (g *GVAAnalyzer) scanPredesignedModules() ([]PredesignedModuleInfo, error) {
 	// 获取autocode配置路径
-	autocodeRoot := global.GVA_CONFIG.AutoCode.Root
+	autocodeRoot := global.IADMIN_CONFIG.AutoCode.Root
 	if autocodeRoot == "" {
 		return nil, errors.New("autocode根路径未配置")
 	}
@@ -389,17 +390,17 @@ func (g *GVAAnalyzer) scanPredesignedModules() ([]PredesignedModuleInfo, error) 
 	var modules []PredesignedModuleInfo
 
 	// 扫描plugin目录
-	pluginModules, err := g.scanPluginModules(filepath.Join(autocodeRoot, global.GVA_CONFIG.AutoCode.Server, "plugin"))
+	pluginModules, err := g.scanPluginModules(filepath.Join(autocodeRoot, global.IADMIN_CONFIG.AutoCode.Server, "plugin"))
 	if err != nil {
-		global.GVA_LOG.Warn(fmt.Sprintf("扫描plugin模块失败: %v", err))
+		global.IADMIN_LOG.Warn(fmt.Sprintf("扫描plugin模块失败: %v", err))
 	} else {
 		modules = append(modules, pluginModules...)
 	}
 
 	// 扫描model目录
-	modelModules, err := g.scanModelModules(filepath.Join(autocodeRoot, global.GVA_CONFIG.AutoCode.Server, "model"))
+	modelModules, err := g.scanModelModules(filepath.Join(autocodeRoot, global.IADMIN_CONFIG.AutoCode.Server, "model"))
 	if err != nil {
-		global.GVA_LOG.Warn(fmt.Sprintf("扫描model模块失败: %v", err))
+		global.IADMIN_LOG.Warn(fmt.Sprintf("扫描model模块失败: %v", err))
 	} else {
 		modules = append(modules, modelModules...)
 	}
@@ -431,7 +432,7 @@ func (g *GVAAnalyzer) scanPluginModules(pluginDir string) ([]PredesignedModuleIn
 				// 扫描model目录下的模块
 				pluginModules, err := g.scanModulesInDirectory(modelDir, pluginName, "plugin")
 				if err != nil {
-					global.GVA_LOG.Warn(fmt.Sprintf("扫描插件 %s 的模块失败: %v", pluginName, err))
+					global.IADMIN_LOG.Warn(fmt.Sprintf("扫描插件 %s 的模块失败: %v", pluginName, err))
 					continue
 				}
 				modules = append(modules, pluginModules...)
@@ -463,7 +464,7 @@ func (g *GVAAnalyzer) scanModelModules(modelDir string) ([]PredesignedModuleInfo
 			// 扫描包目录下的模块
 			packageModules, err := g.scanModulesInDirectory(packagePath, packageName, "package")
 			if err != nil {
-				global.GVA_LOG.Warn(fmt.Sprintf("扫描包 %s 的模块失败: %v", packageName, err))
+				global.IADMIN_LOG.Warn(fmt.Sprintf("扫描包 %s 的模块失败: %v", packageName, err))
 				continue
 			}
 			modules = append(modules, packageModules...)

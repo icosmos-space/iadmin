@@ -1,9 +1,10 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestPluginInitialize_Injection(t *testing.T) {
@@ -22,8 +23,8 @@ func TestPluginInitialize_Injection(t *testing.T) {
 			name: "测试 Gva插件 注册注入",
 			fields: fields{
 				Type:       TypePluginInitializeV2,
-				Path:       filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go"),
-				PluginPath: filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "register.go"),
+				Path:       filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go"),
+				PluginPath: filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "register.go"),
 				ImportPath: `"github.com/icosmos-space/iadmin/server/plugin/gva"`,
 			},
 			wantErr: false,
@@ -69,8 +70,8 @@ func TestPluginInitialize_Rollback(t *testing.T) {
 			name: "测试 Gva插件 回滚",
 			fields: fields{
 				Type:       TypePluginInitializeV2,
-				Path:       filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go"),
-				PluginPath: filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "register.go"),
+				Path:       filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go"),
+				PluginPath: filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "register.go"),
 				ImportPath: `"github.com/icosmos-space/iadmin/server/plugin/gva"`,
 			},
 			wantErr: false,

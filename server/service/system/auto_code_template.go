@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/icosmos-space/iadmin/server/utils/autocode"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -13,6 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/icosmos-space/iadmin/server/utils/autocode"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	model "github.com/icosmos-space/iadmin/server/model/system"
@@ -29,23 +30,23 @@ type autoCodeTemplate struct{}
 func (s *autoCodeTemplate) checkPackage(Pkg string, template string) (err error) {
 	switch template {
 	case "package":
-		apiEnter := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", Pkg, "enter.go")
+		apiEnter := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", Pkg, "enter.go")
 		_, err = os.Stat(apiEnter)
 		if err != nil {
 			return fmt.Errorf("package结构异常,缺少api/v1/%s/enter.go", Pkg)
 		}
-		serviceEnter := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service", Pkg, "enter.go")
+		serviceEnter := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service", Pkg, "enter.go")
 		_, err = os.Stat(serviceEnter)
 		if err != nil {
 			return fmt.Errorf("package结构异常,缺少service/%s/enter.go", Pkg)
 		}
-		routerEnter := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "router", Pkg, "enter.go")
+		routerEnter := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "router", Pkg, "enter.go")
 		_, err = os.Stat(routerEnter)
 		if err != nil {
 			return fmt.Errorf("package结构异常,缺少router/%s/enter.go", Pkg)
 		}
 	case "plugin":
-		pluginEnter := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", Pkg, "plugin.go")
+		pluginEnter := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", Pkg, "plugin.go")
 		_, err = os.Stat(pluginEnter)
 		if err != nil {
 			return fmt.Errorf("plugin结构异常,缺少plugin/%s/plugin.go", Pkg)
@@ -58,7 +59,7 @@ func (s *autoCodeTemplate) checkPackage(Pkg string, template string) (err error)
 func (s *autoCodeTemplate) Create(ctx context.Context, info request.AutoCode) error {
 	history := info.History()
 	var autoPkg model.SysAutoCodePackage
-	err := global.GVA_DB.WithContext(ctx).Where("package_name = ?", info.Package).First(&autoPkg).Error
+	err := global.IADMIN_DB.WithContext(ctx).Where("package_name = ?", info.Package).First(&autoPkg).Error
 	if err != nil {
 		return errors.Wrap(err, "查询包失败!")
 	}
@@ -89,7 +90,7 @@ func (s *autoCodeTemplate) Create(ctx context.Context, info request.AutoCode) er
 	// 自动创建api
 	if info.AutoCreateApiToSql && !info.OnlyTemplate {
 		apis := info.Apis()
-		err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		err := global.IADMIN_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 			for _, v := range apis {
 				var api model.SysApi
 				var id uint
@@ -115,7 +116,7 @@ func (s *autoCodeTemplate) Create(ctx context.Context, info request.AutoCode) er
 	if info.AutoCreateMenuToSql {
 		var entity model.SysBaseMenu
 		var id uint
-		err := global.GVA_DB.WithContext(ctx).First(&entity, "name = ?", info.Abbreviation).Error
+		err := global.IADMIN_DB.WithContext(ctx).First(&entity, "name = ?", info.Abbreviation).Error
 		if err == nil {
 			id = entity.ID
 		} else {
@@ -137,7 +138,7 @@ func (s *autoCodeTemplate) Create(ctx context.Context, info request.AutoCode) er
 					entity.MenuBtn = append(entity.MenuBtn, excelBtn...)
 				}
 			}
-			err = global.GVA_DB.WithContext(ctx).Create(&entity).Error
+			err = global.IADMIN_DB.WithContext(ctx).Create(&entity).Error
 			id = entity.ID
 			if err != nil {
 				return errors.Wrap(err, "创建菜单失败!")
@@ -188,7 +189,7 @@ func (s *autoCodeTemplate) Create(ctx context.Context, info request.AutoCode) er
 // Preview 预览自动化代码
 func (s *autoCodeTemplate) Preview(ctx context.Context, info request.AutoCode) (map[string]string, error) {
 	var entity model.SysAutoCodePackage
-	err := global.GVA_DB.WithContext(ctx).Where("package_name = ?", info.Package).First(&entity).Error
+	err := global.IADMIN_DB.WithContext(ctx).Where("package_name = ?", info.Package).First(&entity).Error
 	if err != nil {
 		return nil, errors.Wrap(err, "查询包失败!")
 	}
@@ -203,8 +204,8 @@ func (s *autoCodeTemplate) Preview(ctx context.Context, info request.AutoCode) (
 		return nil, err
 	}
 	for key, writer := range codes {
-		if len(key) > len(global.GVA_CONFIG.AutoCode.Root) {
-			key, _ = filepath.Rel(global.GVA_CONFIG.AutoCode.Root, key)
+		if len(key) > len(global.IADMIN_CONFIG.AutoCode.Root) {
+			key, _ = filepath.Rel(global.IADMIN_CONFIG.AutoCode.Root, key)
 		}
 		// 获取key的后缀 取消.
 		suffix := filepath.Ext(key)[1:]
@@ -273,7 +274,7 @@ func (s *autoCodeTemplate) generate(ctx context.Context, info request.AutoCode, 
 
 func (s *autoCodeTemplate) AddFunc(info request.AutoFunc) error {
 	autoPkg := model.SysAutoCodePackage{}
-	err := global.GVA_DB.First(&autoPkg, "package_name = ?", info.Package).Error
+	err := global.IADMIN_DB.First(&autoPkg, "package_name = ?", info.Package).Error
 	if err != nil {
 		return err
 	}
@@ -297,7 +298,7 @@ func (s *autoCodeTemplate) AddFunc(info request.AutoFunc) error {
 
 func (s *autoCodeTemplate) GetApiAndServer(info request.AutoFunc) (map[string]string, error) {
 	autoPkg := model.SysAutoCodePackage{}
-	err := global.GVA_DB.First(&autoPkg, "package_name = ?", info.Package).Error
+	err := global.IADMIN_DB.First(&autoPkg, "package_name = ?", info.Package).Error
 	if err != nil {
 		return nil, err
 	}
@@ -322,7 +323,7 @@ func (s *autoCodeTemplate) GetApiAndServer(info request.AutoFunc) (map[string]st
 }
 
 func (s *autoCodeTemplate) getTemplateStr(t string, info request.AutoFunc) (string, error) {
-	tempPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "resource", "function", t+".tpl")
+	tempPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "resource", "function", t+".tpl")
 	files, err := template.New(filepath.Base(tempPath)).Funcs(autocode.GetTemplateFuncMap()).ParseFiles(tempPath)
 	if err != nil {
 		return "", errors.Wrapf(err, "[filepath:%s]读取模版文件失败!", tempPath)
@@ -337,7 +338,7 @@ func (s *autoCodeTemplate) getTemplateStr(t string, info request.AutoFunc) (stri
 }
 
 func (s *autoCodeTemplate) addTemplateToAst(t string, info request.AutoFunc) error {
-	tPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "router", info.Package, info.HumpPackageName+".go")
+	tPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "router", info.Package, info.HumpPackageName+".go")
 	funcName := fmt.Sprintf("Init%sRouter", info.StructName)
 
 	routerStr := "RouterWithoutAuth"
@@ -347,7 +348,7 @@ func (s *autoCodeTemplate) addTemplateToAst(t string, info request.AutoFunc) err
 
 	stmtStr := fmt.Sprintf("%s%s.%s(\"%s\", %sApi.%s)", info.Abbreviation, routerStr, info.Method, info.Router, info.Abbreviation, info.FuncName)
 	if info.IsPlugin {
-		tPath = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", info.Package, "router", info.HumpPackageName+".go")
+		tPath = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", info.Package, "router", info.HumpPackageName+".go")
 		stmtStr = fmt.Sprintf("group.%s(\"%s\", api%s.%s)", info.Method, info.Router, info.StructName, info.FuncName)
 		funcName = "Init"
 	}
@@ -412,26 +413,26 @@ func (s *autoCodeTemplate) addTemplateToFile(t string, info request.AutoFunc) er
 		if info.IsAi && info.ApiFunc != "" {
 			getTemplateStr = info.ApiFunc
 		}
-		target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "api", "v1", info.Package, info.HumpPackageName+".go")
+		target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "api", "v1", info.Package, info.HumpPackageName+".go")
 	case "server.go":
 		if info.IsAi && info.ServerFunc != "" {
 			getTemplateStr = info.ServerFunc
 		}
-		target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "service", info.Package, info.HumpPackageName+".go")
+		target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "service", info.Package, info.HumpPackageName+".go")
 	case "api.js":
 		if info.IsAi && info.JsFunc != "" {
 			getTemplateStr = info.JsFunc
 		}
-		target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "api", info.Package, info.PackageName+".js")
+		target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Web, "api", info.Package, info.PackageName+".js")
 	}
 	if info.IsPlugin {
 		switch t {
 		case "api.go":
-			target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", info.Package, "api", info.HumpPackageName+".go")
+			target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", info.Package, "api", info.HumpPackageName+".go")
 		case "server.go":
-			target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", info.Package, "service", info.HumpPackageName+".go")
+			target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", info.Package, "service", info.HumpPackageName+".go")
 		case "api.js":
-			target = filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "plugin", info.Package, "api", info.PackageName+".js")
+			target = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Web, "plugin", info.Package, "api", info.PackageName+".js")
 		}
 	}
 

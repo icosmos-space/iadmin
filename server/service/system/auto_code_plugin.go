@@ -108,7 +108,7 @@ func (s *autoCodePlugin) Install(file *multipart.FileHeader) (web, server int, e
 		if serverPackage == "" {
 			serverPackage = serverRootName
 		}
-		err = installation(serverPlugin, global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.Server)
+		err = installation(serverPlugin, global.IADMIN_CONFIG.AutoCode.Server, global.IADMIN_CONFIG.AutoCode.Server)
 		if err != nil {
 			return webIndex, serverIndex, err
 		}
@@ -119,7 +119,7 @@ func (s *autoCodePlugin) Install(file *multipart.FileHeader) (web, server int, e
 	}
 
 	if len(webPlugin) != 0 {
-		err = installation(webPlugin, global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.Web)
+		err = installation(webPlugin, global.IADMIN_CONFIG.AutoCode.Server, global.IADMIN_CONFIG.AutoCode.Web)
 		if err != nil {
 			return webIndex, serverIndex, err
 		}
@@ -136,8 +136,8 @@ func installation(path string, formPath string, toPath string) error {
 	}
 	name := arr[ln-3]
 
-	var form = filepath.Join(global.GVA_CONFIG.AutoCode.Root, formPath, path)
-	var to = filepath.Join(global.GVA_CONFIG.AutoCode.Root, toPath, "plugin")
+	var form = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, formPath, path)
+	var to = filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, toPath, "plugin")
 	_, err := os.Stat(to + name)
 	if err == nil {
 		zap.L().Error("autoPath 已存在同名插件，请自行手动安装", zap.String("to", to))
@@ -147,7 +147,7 @@ func installation(path string, formPath string, toPath string) error {
 }
 
 func ensurePluginRegisterImport(packageName string) error {
-	module := strings.TrimSpace(global.GVA_CONFIG.AutoCode.Module)
+	module := strings.TrimSpace(global.IADMIN_CONFIG.AutoCode.Module)
 	if module == "" {
 		return errors.New("autocode module is empty")
 	}
@@ -155,7 +155,7 @@ func ensurePluginRegisterImport(packageName string) error {
 		return errors.New("plugin package is empty")
 	}
 
-	registerPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "register.go")
+	registerPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "register.go")
 	src, err := os.ReadFile(registerPath)
 	if err != nil {
 		return err
@@ -230,8 +230,8 @@ func (s *autoCodePlugin) PubPlug(plugName string) (zipPath string, err error) {
 	// 防止路径穿越
 	plugName = filepath.Clean(plugName)
 
-	webPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "plugin", plugName)
-	serverPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", plugName)
+	webPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Web, "plugin", plugName)
+	serverPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", plugName)
 	// 创建一个新的zip文件
 
 	// 判断目录是否存在
@@ -271,11 +271,11 @@ func (s *autoCodePlugin) PubPlug(plugName string) (zipPath string, err error) {
 		return
 	}
 
-	return filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, fileName), nil
+	return filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, fileName), nil
 }
 
 func (s *autoCodePlugin) InitMenu(menuInfo request.InitMenu) (err error) {
-	menuPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", menuInfo.PlugName, "initialize", "menu.go")
+	menuPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", menuInfo.PlugName, "initialize", "menu.go")
 	src, err := os.ReadFile(menuPath)
 	if err != nil {
 		fmt.Println(err)
@@ -301,7 +301,7 @@ func (s *autoCodePlugin) InitMenu(menuInfo request.InitMenu) (err error) {
 	}
 
 	// 查询菜单及其关联的参数和按钮
-	err = global.GVA_DB.Preload("Parameters").Preload("MenuBtn").Find(&menus, "id in (?)", menuInfo.Menus).Error
+	err = global.IADMIN_DB.Preload("Parameters").Preload("MenuBtn").Find(&menus, "id in (?)", menuInfo.Menus).Error
 	if err != nil {
 		return err
 	}
@@ -318,7 +318,7 @@ func (s *autoCodePlugin) InitMenu(menuInfo request.InitMenu) (err error) {
 }
 
 func (s *autoCodePlugin) InitAPI(apiInfo request.InitApi) (err error) {
-	apiPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", apiInfo.PlugName, "initialize", "api.go")
+	apiPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", apiInfo.PlugName, "initialize", "api.go")
 	src, err := os.ReadFile(apiPath)
 	if err != nil {
 		fmt.Println(err)
@@ -327,7 +327,7 @@ func (s *autoCodePlugin) InitAPI(apiInfo request.InitApi) (err error) {
 	astFile, err := parser.ParseFile(fileSet, "", src, 0)
 	arrayAst := ast.FindArray(astFile, "model", "SysApi")
 	var apis []system.SysApi
-	err = global.GVA_DB.Find(&apis, "id in (?)", apiInfo.APIs).Error
+	err = global.IADMIN_DB.Find(&apis, "id in (?)", apiInfo.APIs).Error
 	if err != nil {
 		return err
 	}
@@ -343,7 +343,7 @@ func (s *autoCodePlugin) InitAPI(apiInfo request.InitApi) (err error) {
 }
 
 func (s *autoCodePlugin) InitDictionary(dictInfo request.InitDictionary) (err error) {
-	dictPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", dictInfo.PlugName, "initialize", "dictionary.go")
+	dictPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", dictInfo.PlugName, "initialize", "dictionary.go")
 	src, err := os.ReadFile(dictPath)
 	if err != nil {
 		fmt.Println(err)
@@ -352,7 +352,7 @@ func (s *autoCodePlugin) InitDictionary(dictInfo request.InitDictionary) (err er
 	astFile, err := parser.ParseFile(fileSet, "", src, 0)
 	arrayAst := ast.FindArray(astFile, "model", "SysDictionary")
 	var dictionaries []system.SysDictionary
-	err = global.GVA_DB.Preload("SysDictionaryDetails").Find(&dictionaries, "id in (?)", dictInfo.Dictionaries).Error
+	err = global.IADMIN_DB.Preload("SysDictionaryDetails").Find(&dictionaries, "id in (?)", dictInfo.Dictionaries).Error
 	if err != nil {
 		return err
 	}
@@ -370,7 +370,7 @@ func (s *autoCodePlugin) InitDictionary(dictInfo request.InitDictionary) (err er
 func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error) {
 	// 1. 删除前端代码
 	if pluginType == "web" || pluginType == "full" {
-		webDir := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "plugin", pluginName)
+		webDir := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Web, "plugin", pluginName)
 		err = os.RemoveAll(webDir)
 		if err != nil {
 			return errors.Wrap(err, "删除前端插件目录失败")
@@ -379,7 +379,7 @@ func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error
 
 	// 2. 删除后端代码
 	if pluginType == "server" || pluginType == "full" {
-		serverDir := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", pluginName)
+		serverDir := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", pluginName)
 		err = os.RemoveAll(serverDir)
 		if err != nil {
 			return errors.Wrap(err, "删除后端插件目录失败")
@@ -396,7 +396,7 @@ func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error
 	if len(menus) > 0 {
 		for _, menu := range menus {
 			var dbMenu system.SysBaseMenu
-			if err := global.GVA_DB.Where("name = ?", menu.Name).First(&dbMenu).Error; err == nil {
+			if err := global.IADMIN_DB.Where("name = ?", menu.Name).First(&dbMenu).Error; err == nil {
 				// 获取该菜单及其所有子菜单的ID
 				var menuIds []int
 				GetMenuIds(dbMenu, &menuIds)
@@ -415,7 +415,7 @@ func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error
 	if len(apis) > 0 {
 		for _, api := range apis {
 			var dbApi system.SysApi
-			if err := global.GVA_DB.Where("path = ? AND method = ?", api.Path, api.Method).First(&dbApi).Error; err == nil {
+			if err := global.IADMIN_DB.Where("path = ? AND method = ?", api.Path, api.Method).First(&dbApi).Error; err == nil {
 				err := ApiServiceApp.DeleteApi(dbApi)
 				if err != nil {
 					zap.L().Error("删除API失败", zap.String("path", api.Path), zap.Error(err))
@@ -428,7 +428,7 @@ func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error
 	if len(dicts) > 0 {
 		for _, dict := range dicts {
 			var dbDict system.SysDictionary
-			if err := global.GVA_DB.Where("type = ?", dict.Type).First(&dbDict).Error; err == nil {
+			if err := global.IADMIN_DB.Where("type = ?", dict.Type).First(&dbDict).Error; err == nil {
 				err := DictionaryServiceApp.DeleteSysDictionary(dbDict)
 				if err != nil {
 					zap.L().Error("删除字典失败", zap.String("type", dict.Type), zap.Error(err))
@@ -443,15 +443,15 @@ func (s *autoCodePlugin) Remove(pluginName string, pluginType string) (err error
 func GetMenuIds(menu system.SysBaseMenu, ids *[]int) {
 	*ids = append(*ids, int(menu.ID))
 	var children []system.SysBaseMenu
-	global.GVA_DB.Where("parent_id = ?", menu.ID).Find(&children)
+	global.IADMIN_DB.Where("parent_id = ?", menu.ID).Find(&children)
 	for _, child := range children {
-        // 先递归收集子菜单
+		// 先递归收集子菜单
 		GetMenuIds(child, ids)
 	}
 }
 
 func removePluginRegisterImport(packageName string) error {
-	module := strings.TrimSpace(global.GVA_CONFIG.AutoCode.Module)
+	module := strings.TrimSpace(global.IADMIN_CONFIG.AutoCode.Module)
 	if module == "" {
 		return errors.New("autocode module is empty")
 	}
@@ -459,7 +459,7 @@ func removePluginRegisterImport(packageName string) error {
 		return errors.New("plugin package is empty")
 	}
 
-	registerPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "register.go")
+	registerPath := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "register.go")
 	src, err := os.ReadFile(registerPath)
 	if err != nil {
 		return err
@@ -471,9 +471,9 @@ func removePluginRegisterImport(packageName string) error {
 	}
 
 	importPath := fmt.Sprintf("%s/plugin/%s", module, packageName)
-    importLit := fmt.Sprintf("%q", importPath)
+	importLit := fmt.Sprintf("%q", importPath)
 
-    // 移除 import
+	// 移除 import
 	var newDecls []goast.Decl
 	for _, decl := range astFile.Decls {
 		genDecl, ok := decl.(*goast.GenDecl)
@@ -493,7 +493,7 @@ func removePluginRegisterImport(packageName string) error {
 					newSpecs = append(newSpecs, spec)
 				}
 			}
-            // 如果还有其他import，保留该 decl
+			// 如果还有其他import，保留该 decl
 			if len(newSpecs) > 0 {
 				genDecl.Specs = newSpecs
 				newDecls = append(newDecls, genDecl)

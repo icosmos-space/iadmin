@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"github.com/icosmos-space/iadmin/server/global"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -9,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/icosmos-space/iadmin/server/global"
 )
 
 func TestAst(t *testing.T) {
-	filename := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go")
+	filename := filepath.Join(global.IADMIN_CONFIG.AutoCode.Root, global.IADMIN_CONFIG.AutoCode.Server, "plugin", "gva", "plugin.go")
 	fileSet := token.NewFileSet()
 	file, err := parser.ParseFile(fileSet, filename, nil, parser.ParseComments)
 	if err != nil {

@@ -12,22 +12,22 @@ type LoginLogService struct{}
 var LoginLogServiceApp = new(LoginLogService)
 
 func (loginLogService *LoginLogService) CreateLoginLog(loginLog system.SysLoginLog) (err error) {
-	err = global.GVA_DB.Create(&loginLog).Error
+	err = global.IADMIN_DB.Create(&loginLog).Error
 	return err
 }
 
 func (loginLogService *LoginLogService) DeleteLoginLogByIds(ids request.IdsReq) (err error) {
-	err = global.GVA_DB.Delete(&[]system.SysLoginLog{}, "id in (?)", ids.Ids).Error
+	err = global.IADMIN_DB.Delete(&[]system.SysLoginLog{}, "id in (?)", ids.Ids).Error
 	return err
 }
 
 func (loginLogService *LoginLogService) DeleteLoginLog(loginLog system.SysLoginLog) (err error) {
-	err = global.GVA_DB.Delete(&loginLog).Error
+	err = global.IADMIN_DB.Delete(&loginLog).Error
 	return err
 }
 
 func (loginLogService *LoginLogService) GetLoginLog(id uint) (loginLog system.SysLoginLog, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&loginLog).Error
+	err = global.IADMIN_DB.Where("id = ?", id).First(&loginLog).Error
 	return
 }
 
@@ -35,7 +35,7 @@ func (loginLogService *LoginLogService) GetLoginLogInfoList(info systemReq.SysLo
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.GVA_DB.Model(&system.SysLoginLog{})
+	db := global.IADMIN_DB.Model(&system.SysLoginLog{})
 	var loginLogs []system.SysLoginLog
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.Username != "" {

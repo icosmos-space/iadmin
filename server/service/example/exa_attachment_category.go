@@ -2,6 +2,7 @@ package example
 
 import (
 	"errors"
+
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/example"
 	"gorm.io/gorm"
@@ -12,18 +13,18 @@ type AttachmentCategoryService struct{}
 // AddCategory 创建/更新的分类
 func (a *AttachmentCategoryService) AddCategory(req *example.ExaAttachmentCategory) (err error) {
 	// 检查是否已存在相同名称的分类
-	if (!errors.Is(global.GVA_DB.Take(&example.ExaAttachmentCategory{}, "name = ? and pid = ?", req.Name, req.Pid).Error, gorm.ErrRecordNotFound)) {
+	if (!errors.Is(global.IADMIN_DB.Take(&example.ExaAttachmentCategory{}, "name = ? and pid = ?", req.Name, req.Pid).Error, gorm.ErrRecordNotFound)) {
 		return errors.New("分类名称已存在")
 	}
 	if req.ID > 0 {
-		if err = global.GVA_DB.Model(&example.ExaAttachmentCategory{}).Where("id = ?", req.ID).Updates(&example.ExaAttachmentCategory{
+		if err = global.IADMIN_DB.Model(&example.ExaAttachmentCategory{}).Where("id = ?", req.ID).Updates(&example.ExaAttachmentCategory{
 			Name: req.Name,
 			Pid:  req.Pid,
 		}).Error; err != nil {
 			return err
 		}
 	} else {
-		if err = global.GVA_DB.Create(&example.ExaAttachmentCategory{
+		if err = global.IADMIN_DB.Create(&example.ExaAttachmentCategory{
 			Name: req.Name,
 			Pid:  req.Pid,
 		}).Error; err != nil {
@@ -36,17 +37,17 @@ func (a *AttachmentCategoryService) AddCategory(req *example.ExaAttachmentCatego
 // DeleteCategory 删除分类
 func (a *AttachmentCategoryService) DeleteCategory(id *int) error {
 	var childCount int64
-	global.GVA_DB.Model(&example.ExaAttachmentCategory{}).Where("pid = ?", id).Count(&childCount)
+	global.IADMIN_DB.Model(&example.ExaAttachmentCategory{}).Where("pid = ?", id).Count(&childCount)
 	if childCount > 0 {
 		return errors.New("请先删除子级")
 	}
-	return global.GVA_DB.Where("id = ?", id).Unscoped().Delete(&example.ExaAttachmentCategory{}).Error
+	return global.IADMIN_DB.Where("id = ?", id).Unscoped().Delete(&example.ExaAttachmentCategory{}).Error
 }
 
 // GetCategoryList 分类列表
 func (a *AttachmentCategoryService) GetCategoryList() (res []*example.ExaAttachmentCategory, err error) {
 	var fileLists []example.ExaAttachmentCategory
-	err = global.GVA_DB.Model(&example.ExaAttachmentCategory{}).Find(&fileLists).Error
+	err = global.IADMIN_DB.Model(&example.ExaAttachmentCategory{}).Find(&fileLists).Error
 	if err != nil {
 		return res, err
 	}

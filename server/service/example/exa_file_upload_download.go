@@ -19,7 +19,7 @@ import (
 //@return: error
 
 func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownload) error {
-	return global.GVA_DB.Create(&file).Error
+	return global.IADMIN_DB.Create(&file).Error
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -30,7 +30,7 @@ func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownl
 
 func (e *FileUploadAndDownloadService) FindFile(id uint) (example.ExaFileUploadAndDownload, error) {
 	var file example.ExaFileUploadAndDownload
-	err := global.GVA_DB.Where("id = ?", id).First(&file).Error
+	err := global.IADMIN_DB.Where("id = ?", id).First(&file).Error
 	return file, err
 }
 
@@ -50,14 +50,14 @@ func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndD
 	if err = oss.DeleteFile(fileFromDb.Key); err != nil {
 		return errors.New("文件删除失败")
 	}
-	err = global.GVA_DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
+	err = global.IADMIN_DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
 	return err
 }
 
 // EditFileName 编辑文件名或者备注
 func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAndDownload) (err error) {
 	var fileFromDb example.ExaFileUploadAndDownload
-	return global.GVA_DB.Where("id = ?", file.ID).First(&fileFromDb).Update("name", file.Name).Error
+	return global.IADMIN_DB.Where("id = ?", file.ID).First(&fileFromDb).Update("name", file.Name).Error
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -69,7 +69,7 @@ func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAn
 func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.ExaAttachmentCategorySearch) (list []example.ExaFileUploadAndDownload, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&example.ExaFileUploadAndDownload{})
+	db := global.IADMIN_DB.Model(&example.ExaFileUploadAndDownload{})
 
 	if len(info.Keyword) > 0 {
 		db = db.Where("name LIKE ?", "%"+info.Keyword+"%")
@@ -110,7 +110,7 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 	if noSave == "0" {
 		// 检查是否已存在相同key的记录
 		var existingFile example.ExaFileUploadAndDownload
-		err = global.GVA_DB.Where(&example.ExaFileUploadAndDownload{Key: key}).First(&existingFile).Error
+		err = global.IADMIN_DB.Where(&example.ExaFileUploadAndDownload{Key: key}).First(&existingFile).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return f, e.Upload(f)
 		}
@@ -126,5 +126,5 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 //@return: error
 
 func (e *FileUploadAndDownloadService) ImportURL(file *[]example.ExaFileUploadAndDownload) error {
-	return global.GVA_DB.Create(&file).Error
+	return global.IADMIN_DB.Create(&file).Error
 }
