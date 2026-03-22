@@ -8,7 +8,7 @@ RUN go env -w GO111MODULE=on \
     && go env -w CGO_ENABLED=0 \
     && go env \
     && go mod tidy \
-    && go build -o server .
+    && go build -ldflags "-s -w" -o server .
 
 FROM alpine:latest
 

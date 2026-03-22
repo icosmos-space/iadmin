@@ -4,12 +4,14 @@ import "github.com/icosmos-space/iadmin/server/service"
 
 type ApiGroup struct {
 	CustomerApi
-	FileUploadAndDownloadApi
+
 	AttachmentCategoryApi
+	FileUploadAndDownloadApi
 }
 
 var (
-	customerService              = service.ServiceGroupApp.ExampleServiceGroup.CustomerService
-	fileUploadAndDownloadService = service.ServiceGroupApp.ExampleServiceGroup.FileUploadAndDownloadService
+	customerService = service.ServiceGroupApp.ExampleServiceGroup.CustomerService
+
 	attachmentCategoryService    = service.ServiceGroupApp.ExampleServiceGroup.AttachmentCategoryService
+	fileUploadAndDownloadService = service.ServiceGroupApp.ExampleServiceGroup.FileUploadAndDownloadService
 )

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/mark3labs/mcp-go/server"
-
 	"github.com/gin-gonic/gin"
 	"github.com/qiniu/qmgo"
 
@@ -37,7 +35,6 @@ var (
 	GVA_Concurrency_Control             = &singleflight.Group{}
 	IADMIN_ROUTERS          gin.RoutesInfo
 	IADMIN_ACTIVE_DBNAME    *string
-	IADMIN_MCP_SERVER       *server.MCPServer
 	BlackCache              local_cache.Cache
 	lock                    sync.RWMutex
 )

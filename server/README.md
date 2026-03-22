@@ -52,3 +52,11 @@
 | `--timer` | timer | 定时器接口封装 |
 | `--upload`      | oss                  | oss接口封装        |
 
+## 构建说明
+
+- **生产（默认）**：不含 Swagger UI 内嵌页、`swaggo/files`、`mcp` 整包及 MCP HTTP 路由；体积更小。  
+  `go build -ldflags="-s -w" -o server .`
+- **开发（文档 + MCP）**：  
+  `go run -tags=dev .` 或 `go build -tags=dev -ldflags="-s -w" -o server .`  
+  需 API 文档时请先执行 `swag init`（见仓库根 `Makefile` 的 `doc` 目标）。
+

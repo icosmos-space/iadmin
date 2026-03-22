@@ -5,12 +5,9 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/icosmos-space/iadmin/server/docs"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/middleware"
 	"github.com/icosmos-space/iadmin/server/router"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type justFilesFilesystem struct {
@@ -41,19 +38,7 @@ func Routers() *gin.Engine {
 		Router.Use(gin.Logger())
 	}
 
-	if !global.IADMIN_CONFIG.MCP.Separate {
-
-		sseServer := McpRun()
-
-		// 注册mcp服务
-		Router.GET(global.IADMIN_CONFIG.MCP.SSEPath, func(c *gin.Context) {
-			sseServer.SSEHandler().ServeHTTP(c.Writer, c.Request)
-		})
-
-		Router.POST(global.IADMIN_CONFIG.MCP.MessagePath, func(c *gin.Context) {
-			sseServer.MessageHandler().ServeHTTP(c.Writer, c.Request)
-		})
-	}
+	registerDevTools(Router)
 
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
@@ -70,10 +55,6 @@ func Routers() *gin.Engine {
 	// Router.Use(middleware.Cors()) // 直接放行全部跨域请求
 	// Router.Use(middleware.CorsByRules()) // 按照配置的规则放行跨域请求
 	// global.GVA_LOG.Info("use middleware cors")
-	docs.SwaggerInfo.BasePath = global.IADMIN_CONFIG.System.RouterPrefix
-	Router.GET(global.IADMIN_CONFIG.System.RouterPrefix+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	global.IADMIN_LOG.Info("register swagger handler")
-	// 方便统一添加路由组前缀 多服务器上线使用
 
 	PublicGroup := Router.Group(global.IADMIN_CONFIG.System.RouterPrefix)
 	PrivateGroup := Router.Group(global.IADMIN_CONFIG.System.RouterPrefix)
