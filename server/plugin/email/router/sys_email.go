@@ -1,9 +1,9 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/middleware"
 	"github.com/icosmos-space/iadmin/server/plugin/email/api"
-	"github.com/gin-gonic/gin"
 )
 
 type EmailRouter struct{}
