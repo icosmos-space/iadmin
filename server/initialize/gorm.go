@@ -6,6 +6,7 @@ import (
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/example"
 	"github.com/icosmos-space/iadmin/server/model/system"
+	appclientmodel "github.com/icosmos-space/iadmin/server/plugin/appclient/model"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -71,6 +72,8 @@ func RegisterTables() {
 		example.ExaFileChunk{},
 		example.ExaFileUploadAndDownload{},
 		example.ExaAttachmentCategory{},
+
+		appclientmodel.AppUser{},
 	)
 	if err != nil {
 		global.IADMIN_LOG.Error("register table failed", zap.Error(err))

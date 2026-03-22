@@ -2,6 +2,8 @@ package config
 
 type Server struct {
 	JWT       JWT     `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
+	// AppJWT C端（终端用户）独立签发，须与后台 jwt 使用不同 signing-key
+	AppJWT    JWT     `mapstructure:"app-jwt" json:"app-jwt" yaml:"app-jwt"`
 	Zap       Zap     `mapstructure:"zap" json:"zap" yaml:"zap"`
 	Redis     Redis   `mapstructure:"redis" json:"redis" yaml:"redis"`
 	RedisList []Redis `mapstructure:"redis-list" json:"redis-list" yaml:"redis-list"`

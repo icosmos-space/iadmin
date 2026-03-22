@@ -2,10 +2,16 @@
 
 # jwt configuration
 jwt:
-    signing-key: qmPlus
+    signing-key: iadmin-server-b8e1042d-7c42-514g-c4e7-b7618dg1e58b
     expires-time: 7d
     buffer-time: 1d
     issuer: qmPlus
+# C 端（终端用户）JWT，须与上方 jwt.signing-key 不同
+app-jwt:
+    signing-key: iadmin-app-b8e1042d-7c42-514g-c4e7-b7618dg1e58b
+    expires-time: 30d
+    buffer-time: 1d
+    issuer: iadmin-app
 # zap logger configuration
 zap:
     level: info

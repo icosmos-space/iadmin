@@ -6,6 +6,7 @@ import (
 	"github.com/icosmos-space/iadmin/server/model/example"
 	sysModel "github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model"
+	appclientmodel "github.com/icosmos-space/iadmin/server/plugin/appclient/model"
 	"github.com/icosmos-space/iadmin/server/service/system"
 	"gorm.io/gorm"
 )
@@ -66,6 +67,7 @@ func (e *ensureTables) MigrateTable(ctx context.Context) (context.Context, error
 		example.ExaAttachmentCategory{},
 
 		model.Info{},
+		appclientmodel.AppUser{},
 	}
 	for _, t := range tables {
 		_ = db.AutoMigrate(&t)
@@ -107,6 +109,7 @@ func (e *ensureTables) TableCreated(ctx context.Context) bool {
 		example.ExaAttachmentCategory{},
 
 		model.Info{},
+		appclientmodel.AppUser{},
 	}
 	yes := true
 	for _, t := range tables {
