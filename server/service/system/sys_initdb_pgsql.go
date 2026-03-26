@@ -10,6 +10,7 @@ import (
 
 	"github.com/gookit/color"
 	"github.com/icosmos-space/iadmin/server/config"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/icosmos-space/iadmin/server/utils"
 
@@ -63,8 +64,11 @@ func (h PgsqlInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (n
 		createSql = fmt.Sprintf("CREATE DATABASE %s;", c.Dbname)
 	}
 	if err = createDatabase(dsn, "pgx", createSql); err != nil {
-		return nil, err
-	} // 创建数据库
+		var pgErr *pgconn.PgError
+		if !errors.As(err, &pgErr) || pgErr.Code != "42P04" {
+			return nil, err
+		}
+	}
 
 	var db *gorm.DB
 	if db, err = gorm.Open(postgres.New(postgres.Config{

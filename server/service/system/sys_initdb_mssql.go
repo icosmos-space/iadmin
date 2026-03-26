@@ -5,7 +5,9 @@ package system
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gookit/color"
@@ -51,6 +53,14 @@ func (h MssqlInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (n
 	if c.Dbname == "" {
 		return ctx, nil
 	} // 如果没有数据库名, 则跳出初始化数据
+
+	masterDsn := conf.MssqlMasterDsn()
+	dbnameForID := strings.ReplaceAll(c.Dbname, "'", "''")
+	dbnameForCreate := strings.ReplaceAll(c.Dbname, "]", "]]")
+	createSql := fmt.Sprintf("IF DB_ID(N'%s') IS NULL CREATE DATABASE [%s];", dbnameForID, dbnameForCreate)
+	if err = createDatabase(masterDsn, "sqlserver", createSql); err != nil {
+		return nil, err
+	}
 
 	dsn := conf.MssqlEmptyDsn()
 

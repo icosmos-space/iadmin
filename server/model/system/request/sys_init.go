@@ -54,6 +54,10 @@ func (i *InitDB) MssqlEmptyDsn() string {
 	return "sqlserver://" + i.UserName + ":" + i.Password + "@" + i.Host + ":" + i.Port + "?database=" + i.DBName + "&encrypt=disable"
 }
 
+func (i *InitDB) MssqlMasterDsn() string {
+	return "sqlserver://" + i.UserName + ":" + i.Password + "@" + i.Host + ":" + i.Port + "?database=master&encrypt=disable"
+}
+
 // ToMysqlConfig 转换 config.Mysql
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (i *InitDB) ToMysqlConfig() config.Mysql {
