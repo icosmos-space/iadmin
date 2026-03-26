@@ -806,8 +806,8 @@
 </template>
 
 <script setup>
-  import FieldDialog from '@/view/systemTools/autoCode/component/fieldDialog.vue'
-  import PreviewCodeDialog from '@/view/systemTools/autoCode/component/previewCodeDialog.vue'
+  import FieldDialog from '@/view/dev/autoCode/component/fieldDialog.vue'
+  import PreviewCodeDialog from '@/view/dev/autoCode/component/previewCodeDialog.vue'
   import {
     toUpperCase,
     toHump,

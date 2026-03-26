@@ -144,7 +144,7 @@ web/
 │   │   ├── layout/      # 布局组件
 │   │   ├── login/       # 登录页
 │   │   ├── superAdmin/  # 超级管理员
-│   │   ├── systemTools/ # 系统工具
+│   │   ├── dev/         # 开发中心
 │   │   └── cattery/     # 业务页面
 │   ├── App.vue          # 根组件
 │   └── main.js          # 程序入口

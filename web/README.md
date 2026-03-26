@@ -98,7 +98,7 @@ web
  |   |   ├── person             --个人中心
  |   |   ├── superAdmin         -- 超级管理员操作
  |   |   ├── system             -- 系统检测页面
- |   |   ├── systemTools        -- 系统配置相关页面
+ |   |   ├── dev                -- 系统配置相关页面
  |   |   └── routerHolder.vue   -- page 入口页面
  ├── vite.config.js             -- vite 配置文件
  └── yarn.lock
