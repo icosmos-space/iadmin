@@ -2,12 +2,19 @@ package initialize
 
 import (
 	"context"
+	"sync"
 
 	"github.com/icosmos-space/iadmin/server/config"
 	"github.com/icosmos-space/iadmin/server/global"
 
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+)
+
+var (
+	redisOnce     sync.Once
+	redisListOnce sync.Once
+	redisInitMu   sync.Mutex
 )
 
 func initRedisClient(redisCfg config.Redis) (redis.UniversalClient, error) {
@@ -37,23 +44,55 @@ func initRedisClient(redisCfg config.Redis) (redis.UniversalClient, error) {
 }
 
 func Redis() {
-	redisClient, err := initRedisClient(global.IADMIN_CONFIG.Redis)
-	if err != nil {
-		panic(err)
-	}
-	global.IADMIN_REDIS = redisClient
-}
+	redisInitMu.Lock()
+	defer redisInitMu.Unlock()
 
-func RedisList() {
-	redisMap := make(map[string]redis.UniversalClient)
-
-	for _, redisCfg := range global.IADMIN_CONFIG.RedisList {
-		client, err := initRedisClient(redisCfg)
+	redisOnce.Do(func() {
+		redisClient, err := initRedisClient(global.IADMIN_CONFIG.Redis)
 		if err != nil {
 			panic(err)
 		}
-		redisMap[redisCfg.Name] = client
+		global.IADMIN_REDIS = redisClient
+	})
+}
+
+func RedisList() {
+	redisInitMu.Lock()
+	defer redisInitMu.Unlock()
+
+	redisListOnce.Do(func() {
+		redisMap := make(map[string]redis.UniversalClient)
+
+		for _, redisCfg := range global.IADMIN_CONFIG.RedisList {
+			client, err := initRedisClient(redisCfg)
+			if err != nil {
+				panic(err)
+			}
+			redisMap[redisCfg.Name] = client
+		}
+
+		global.GVA_REDISList = redisMap
+	})
+}
+
+// resetRedisSingleton 重置 Redis 单例状态，仅供测试辅助入口调用。
+func resetRedisSingleton() {
+	redisInitMu.Lock()
+	defer redisInitMu.Unlock()
+
+	if global.IADMIN_REDIS != nil {
+		_ = global.IADMIN_REDIS.Close()
+		global.IADMIN_REDIS = nil
 	}
 
-	global.GVA_REDISList = redisMap
+	for name, client := range global.GVA_REDISList {
+		if client != nil {
+			_ = client.Close()
+		}
+		delete(global.GVA_REDISList, name)
+	}
+	global.GVA_REDISList = nil
+
+	redisOnce = sync.Once{}
+	redisListOnce = sync.Once{}
 }
