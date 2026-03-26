@@ -82,5 +82,6 @@
   "/src/view/system/state.vue": "State",
   "/src/plugin/announcement/form/info.vue": "InfoForm",
   "/src/plugin/announcement/view/info.vue": "Info",
-  "/src/plugin/email/view/index.vue": "Email"
+  "/src/plugin/email/view/index.vue": "Email",
+  "/src/plugin/supabase/view/user.vue": "SupabaseUser"
 }

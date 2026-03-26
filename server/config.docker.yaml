@@ -69,6 +69,9 @@ email:
     is-ssl: true
     secret: xxx
     nickname: test
+supabase:
+    url: ""
+    service-role-key: ""
 
 # system configuration
 system:
