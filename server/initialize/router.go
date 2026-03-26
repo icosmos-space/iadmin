@@ -38,6 +38,7 @@ func Routers() *gin.Engine {
 		Router.Use(gin.Logger())
 	}
 
+	registerPprof(Router)
 	registerDevTools(Router)
 
 	systemRouter := router.RouterGroupApp.System
