@@ -79,6 +79,9 @@
                   >登 录</el-button
                 >
               </el-form-item>
+              <el-form-item class="mb-6">
+                <SnsAuthBtnGroup mode="login" @success="onSnsLoginSuccess" />
+              </el-form-item>
               <el-form-item v-if="isDev" class="mb-6">
                 <el-button
                   class="shadow shadow-active h-11 w-full"
@@ -132,6 +135,7 @@
   import { useRouter } from 'vue-router'
   import { useUserStore } from '@/pinia/modules/user'
   import Logo from '@/components/logo/index.vue'
+  import SnsAuthBtnGroup from '@/plugin/snsauth/components/sns-auth-btn-group.vue'
   import { isDev } from '@/utils/env.js'
 
   defineOptions({
@@ -231,6 +235,10 @@
       // 登陆成功
       return true
     })
+  }
+
+  const onSnsLoginSuccess = async (data) => {
+    await userStore.LoginBySnsResult(data)
   }
 
   // 跳转初始化

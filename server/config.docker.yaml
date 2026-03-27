@@ -72,6 +72,43 @@ email:
 supabase:
     url: ""
     service-role-key: ""
+sns-auth:
+    github:
+        enabled: false
+        client-id: ""
+        client-secret: ""
+        redirect-url: ""
+        scopes: "read:user user:email"
+        auth-url: "https://github.com/login/oauth/authorize"
+        token-url: "https://github.com/login/oauth/access_token"
+        user-info-url: "https://api.github.com/user"
+    feishu:
+        enabled: false
+        client-id: ""
+        client-secret: ""
+        redirect-url: ""
+        scopes: "contact:user.base:readonly"
+        auth-url: "https://accounts.feishu.cn/open-apis/authen/v1/authorize"
+        token-url: "https://open.feishu.cn/open-apis/authen/v1/oidc/access_token"
+        user-info-url: "https://open.feishu.cn/open-apis/authen/v1/user_info"
+    wechat:
+        enabled: false
+        client-id: ""
+        client-secret: ""
+        redirect-url: ""
+        scopes: ""
+        auth-url: ""
+        token-url: ""
+        user-info-url: ""
+    telegram:
+        enabled: false
+        client-id: ""
+        client-secret: ""
+        redirect-url: ""
+        scopes: ""
+        auth-url: ""
+        token-url: ""
+        user-info-url: ""
 
 # system configuration
 system:

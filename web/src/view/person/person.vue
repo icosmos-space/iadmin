@@ -155,6 +155,7 @@
             </el-button>
           </div>
         </div>
+        <SnsBindPanel />
       </div>
 
       <!-- 右侧内容区 -->
@@ -362,6 +363,7 @@
   import { ElMessage } from 'element-plus'
   import { useUserStore } from '@/pinia/modules/user'
   import SelectImage from '@/components/selectImage/selectImage.vue'
+  import SnsBindPanel from '@/plugin/snsauth/components/sns-bind-panel.vue'
   defineOptions({
     name: 'Person'
   })

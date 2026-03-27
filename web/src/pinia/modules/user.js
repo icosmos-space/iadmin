@@ -109,6 +109,26 @@ export const useUserStore = defineStore('user', () => {
       loadingInstance.value?.close()
     }
   }
+
+  const LoginBySnsResult = async (data) => {
+    if (!data?.token || !data?.user) {
+      return false
+    }
+    setUserInfo(data.user)
+    setToken(data.token)
+    const routerStore = useRouterStore()
+    await routerStore.SetAsyncRouter()
+    const asyncRouters = routerStore.asyncRouters
+    asyncRouters.forEach((asyncRouter) => {
+      router.addRoute(asyncRouter)
+    })
+    if (!router.hasRoute(userInfo.value.authority.defaultRouter)) {
+      ElMessage.error('不存在可以登陆的首页，请联系管理员进行配置')
+      return false
+    }
+    await router.replace({ name: userInfo.value.authority.defaultRouter })
+    return true
+  }
   /* 登出*/
   const LoginOut = async () => {
     const res = await jsonInBlacklist()
@@ -142,6 +162,7 @@ export const useUserStore = defineStore('user', () => {
     ResetUserInfo,
     GetUserInfo,
     LoginIn,
+    LoginBySnsResult,
     LoginOut,
     setToken,
     loadingInstance,
