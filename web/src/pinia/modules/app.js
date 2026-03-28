@@ -10,8 +10,9 @@ export const useAppStore = defineStore('app', () => {
   const config = reactive({
     weakness: false,
     grey: false,
+    enable_ai_chat: true,
     primaryColor: '#3b82f6',
-    showTabs: true,
+    showTabs: false,
     darkMode: 'auto',
     layout_side_width: 256,
     layout_side_collapsed_width: 80,
@@ -42,6 +43,10 @@ export const useAppStore = defineStore('app', () => {
 
   const toggleGrey = (e) => {
     config.grey = e
+  }
+
+  const toggleAiChat = (e) => {
+    config.enable_ai_chat = e
   }
 
   const togglePrimaryColor = (e) => {
@@ -107,8 +112,9 @@ export const useAppStore = defineStore('app', () => {
   const baseCoinfg = {
     weakness: false,
     grey: false,
+    enable_ai_chat: true,
     primaryColor: '#3b82f6',
-    showTabs: true,
+    showTabs: false,
     darkMode: 'auto',
     layout_side_width: 256,
     layout_side_collapsed_width: 80,
@@ -147,6 +153,7 @@ export const useAppStore = defineStore('app', () => {
     toggleDevice,
     toggleWeakness,
     toggleGrey,
+    toggleAiChat,
     togglePrimaryColor,
     toggleTabs,
     toggleDarkMode,

@@ -82,6 +82,13 @@
             </template>
             <el-switch v-model="config.show_watermark" @change="appStore.toggleConfigWatermark" />
           </SettingItem>
+
+          <SettingItem label="AI 悬浮球">
+            <template #suffix>
+              <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">显示全局 AI 聊天悬浮插件</span>
+            </template>
+            <el-switch v-model="config.enable_ai_chat" @change="appStore.toggleAiChat" />
+          </SettingItem>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
     <el-config-provider :locale="zhCn" :size="appStore.config.global_size">
       <router-view />
       <Application />
+      <AiSuspendedBallChat v-if="appStore.config.enable_ai_chat" />
     </el-config-provider>
   </div>
 </template>
@@ -13,6 +14,7 @@
 <script setup>
   import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
   import Application from '@/components/application/index.vue'
+  import AiSuspendedBallChat from '@/components/aiSuspendedBallChat/index.vue'
   import { useAppStore } from '@/pinia'
 
   const appStore = useAppStore()
