@@ -10,7 +10,7 @@ import (
 func Menu(ctx context.Context) {
 	entities := []model.SysBaseMenu{
 		{
-			ParentId:  0,
+			ParentId:  8,
 			Path:      "snsAuthConfig",
 			Name:      "snsAuthConfig",
 			Hidden:    false,

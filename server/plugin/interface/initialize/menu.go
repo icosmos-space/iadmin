@@ -11,11 +11,12 @@ func Menu(ctx context.Context) {
 	entities := []model.SysBaseMenu{
 		{
 			ParentId:  8,
-			Path:      "supabaseUser",
-			Name:      "supabaseUser",
+			Path:      "interface",
+			Name:      "interface",
 			Hidden:    false,
-			Component: "plugin/supabase/view/user.vue",
-			Meta:      model.Meta{Title: "Supabase用户", Icon: "user"},
+			Component: "plugin/interface/view/swagger.vue",
+			Sort:      0,
+			Meta:      model.Meta{Title: "接口管理", Icon: "tickets"},
 		},
 	}
 	utils.RegisterMenus(entities...)

@@ -12,6 +12,13 @@ import (
 )
 
 func OtherInit() {
+	if strings.TrimSpace(global.IADMIN_CONFIG.JWT.ExpiresTime) == "" {
+		global.IADMIN_CONFIG.JWT.ExpiresTime = "7d"
+	}
+	if strings.TrimSpace(global.IADMIN_CONFIG.JWT.BufferTime) == "" {
+		global.IADMIN_CONFIG.JWT.BufferTime = "1d"
+	}
+
 	dr, err := utils.ParseDuration(global.IADMIN_CONFIG.JWT.ExpiresTime)
 	if err != nil {
 		panic(err)

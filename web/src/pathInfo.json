@@ -83,6 +83,7 @@
   "/src/plugin/announcement/form/info.vue": "InfoForm",
   "/src/plugin/announcement/view/info.vue": "Info",
   "/src/plugin/email/view/index.vue": "Email",
+  "/src/plugin/interface/view/swagger.vue": "ApiSwaggerManager",
   "/src/plugin/snsauth/components/sns-auth-btn-group.vue": "SnsAuthBtnGroup",
   "/src/plugin/snsauth/components/sns-bind-panel.vue": "SnsBindPanel",
   "/src/plugin/snsauth/view/config.vue": "SnsAuthConfig",
