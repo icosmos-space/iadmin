@@ -82,6 +82,16 @@
               <el-form-item class="mb-6">
                 <SnsAuthBtnGroup mode="login" @success="onSnsLoginSuccess" />
               </el-form-item>
+              <el-form-item class="mb-6">
+                <el-button
+                  class="h-10 w-full"
+                  plain
+                  size="large"
+                  @click="router.push({ name: 'Landing' })"
+                >
+                  查看产品介绍
+                </el-button>
+              </el-form-item>
               <el-form-item v-if="isDev" class="mb-6">
                 <el-button
                   class="shadow shadow-active h-11 w-full"

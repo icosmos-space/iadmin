@@ -12,8 +12,10 @@ Nprogress.configure({
   speed: 500
 })
 
-// 白名单路由
-const WHITE_LIST = ['Login', 'Init']
+// 可直接访问的公开路由
+const PUBLIC_ROUTE_LIST = ['Login', 'Init', 'Landing', 'Features', 'Pricing', 'Contact', 'Privacy', 'Terms']
+// 已登录后访问这些路由时，自动跳转到默认首页
+const REDIRECT_AFTER_LOGIN_LIST = ['Login', 'Init']
 
 function isExternalUrl(val) {
   return typeof val === 'string' && /^(https?:)?\/\//.test(val)
@@ -170,8 +172,8 @@ router.beforeEach(async (to, from) => {
   }
 
   // 白名单路由处理
-  if (WHITE_LIST.includes(to.name)) {
-    if (token) {
+  if (PUBLIC_ROUTE_LIST.includes(to.name)) {
+    if (token && REDIRECT_AFTER_LOGIN_LIST.includes(to.name)) {
       if(!routerStore.asyncRouterFlag){
         await setupRouter(userStore)
       }
@@ -191,7 +193,7 @@ router.beforeEach(async (to, from) => {
     }
 
     // 处理异步路由
-    if (!routerStore.asyncRouterFlag && !WHITE_LIST.includes(from.name)) {
+    if (!routerStore.asyncRouterFlag && !PUBLIC_ROUTE_LIST.includes(from.name)) {
       await setupRouter(userStore)
       return to
     }
