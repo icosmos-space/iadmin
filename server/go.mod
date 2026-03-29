@@ -3,6 +3,7 @@ module github.com/icosmos-space/iadmin/server
 go 1.24.0
 
 require (
+	github.com/ArtisanCloud/PowerWeChat/v3 v3.4.40
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/aws/aws-sdk-go-v2 v1.41.2
 	github.com/aws/aws-sdk-go-v2/config v1.32.10
@@ -64,7 +65,6 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/ArtisanCloud/PowerLibs/v3 v3.3.2 // indirect
 	github.com/ArtisanCloud/PowerSocialite/v3 v3.0.10 // indirect
-	github.com/ArtisanCloud/PowerWeChat/v3 v3.4.40 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/STARRY-S/zip v0.2.1 // indirect
