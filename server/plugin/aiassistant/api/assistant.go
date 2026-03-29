@@ -1,6 +1,7 @@
-﻿package api
+package api
 
 import (
+	"bufio"
 	"errors"
 	"io"
 	"net/http"
@@ -135,39 +136,42 @@ func (a *assistant) Chat(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if in.Stream {
-		//设置SSE必要Header
-		c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-		c.Writer.Header().Set("X-Accel-Buffering", "no")
-		c.Writer.WriteHeader(http.StatusOK)
 
-		flusher, ok := c.Writer.(http.Flusher)
+	var flusher http.Flusher
+	if in.Stream {
+		var ok bool
+		flusher, ok = a.initSSE(c)
 		if !ok {
-			response.FailWithMessage("streaming unsupported", c)
 			return
 		}
-		// 立刻发一个 meta，便于前端确认流已建立
-		c.SSEvent("meta", gin.H{"ok": true, "ts": time.Now().Unix()})
-		flusher.Flush()
 	}
 
 	resp, err := serviceAssistant.RequestChat(c.Request.Context(), in)
 	if err != nil {
-		c.SSEvent("error", gin.H{"message": err.Error()})
+		if in.Stream {
+			a.emitSSE(c, flusher, "error", gin.H{"message": err.Error()})
+			a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+			return
+		}
+		response.FailWithMessage(err.Error(), c)
+		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
-		response.FailWithMessage(extractUpstreamError(string(body), resp.Status), c)
+		msg := extractUpstreamError(string(body), resp.Status)
+		if in.Stream {
+			a.emitSSE(c, flusher, "error", gin.H{"message": msg})
+			a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+			return
+		}
+		response.FailWithMessage(msg, c)
 		return
 	}
 
-	// 如果请求是流式，直接使用 SSE 代理
 	if in.Stream {
-		a.proxyStream(c, resp.Body)
+		a.proxyStream(c, resp.Body, flusher)
 		return
 	}
 
@@ -177,38 +181,94 @@ func (a *assistant) Chat(c *gin.Context) {
 		return
 	}
 
-	// 尝试解析 AI 响应为 JSON
-	var aiResponse map[string]interface{}
+	var aiResponse map[string]any
 	if err := json.Unmarshal(body, &aiResponse); err != nil {
-		// 解析失败，返回原始内容
 		response.OkWithData(gin.H{"content": string(body)}, c)
 		return
 	}
 
-	// 包装成标准响应格式
 	response.OkWithData(aiResponse, c)
 }
 
-func (a *assistant) proxyStream(c *gin.Context, body io.Reader) {
-	// 设置 SSE 必要的响应头
+func (a *assistant) initSSE(c *gin.Context) (http.Flusher, bool) {
+	flusher, ok := c.Writer.(http.Flusher)
+	if !ok {
+		response.FailWithMessage("streaming unsupported", c)
+		return nil, false
+	}
+
 	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 	c.Writer.Header().Set("Cache-Control", "no-cache")
 	c.Writer.Header().Set("Connection", "keep-alive")
 	c.Writer.Header().Set("X-Accel-Buffering", "no")
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	c.Writer.WriteHeader(http.StatusOK)
 
-	flusher, ok := c.Writer.(http.Flusher)
-	if !ok {
-		response.FailWithMessage("streaming unsupported", c)
-		return
+	a.emitSSE(c, flusher, "meta", gin.H{"ok": true, "ts": time.Now().Unix()})
+	return flusher, true
+}
+
+func (a *assistant) emitSSE(c *gin.Context, flusher http.Flusher, event string, payload any) {
+	c.SSEvent(event, payload)
+	flusher.Flush()
+}
+
+func (a *assistant) proxyStream(c *gin.Context, body io.Reader, flusher http.Flusher) {
+	reader := bufio.NewReader(body)
+	eventName := ""
+	dataLines := make([]string, 0, 4)
+
+	flushEvent := func() (done bool) {
+		if len(dataLines) == 0 {
+			eventName = ""
+			return false
+		}
+
+		data := strings.TrimSpace(strings.Join(dataLines, "\n"))
+		event := strings.ToLower(strings.TrimSpace(eventName))
+		eventName = ""
+		dataLines = dataLines[:0]
+
+		if data == "" {
+			return false
+		}
+		if data == "[DONE]" || event == "done" {
+			a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+			return true
+		}
+		if event == "error" {
+			a.emitSSE(c, flusher, "error", gin.H{"message": extractUpstreamError(data, "upstream error")})
+			a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+			return true
+		}
+
+		var payload any
+		if err := json.Unmarshal([]byte(data), &payload); err == nil {
+			if payloadMap, ok := payload.(map[string]any); ok {
+				if msg := extractPayloadError(payloadMap); msg != "" {
+					a.emitSSE(c, flusher, "error", gin.H{"message": msg})
+					a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+					return true
+				}
+				if delta := extractPayloadDelta(payloadMap); delta != "" {
+					a.emitSSE(c, flusher, "delta", gin.H{"content": delta})
+				}
+				if isPayloadDone(payloadMap) {
+					a.emitSSE(c, flusher, "done", gin.H{"ok": true})
+					return true
+				}
+				return false
+			}
+			if delta := extractPayloadDelta(payload); delta != "" {
+				a.emitSSE(c, flusher, "delta", gin.H{"content": delta})
+			}
+			return false
+		}
+
+		a.emitSSE(c, flusher, "delta", gin.H{"content": data})
+		return false
 	}
 
-	// 发送初始 meta 事件，让前端确认连接已建立
-	c.SSEvent("meta", gin.H{"ok": true, "ts": time.Now().Unix()})
-	flusher.Flush()
-
-	// 读取并转发 AI 的 SSE 流
-	buffer := make([]byte, 4096)
 	for {
 		select {
 		case <-c.Request.Context().Done():
@@ -216,28 +276,127 @@ func (a *assistant) proxyStream(c *gin.Context, body io.Reader) {
 		default:
 		}
 
-		n, err := body.Read(buffer)
-		if n > 0 {
-			// 直接转发 AI 的原始 SSE 数据
-			if _, wErr := c.Writer.Write(buffer[:n]); wErr != nil {
-				return
+		line, err := reader.ReadString('\n')
+		if len(line) > 0 {
+			line = strings.TrimRight(line, "\r\n")
+			switch {
+			case line == "":
+				if flushEvent() {
+					return
+				}
+			case strings.HasPrefix(line, ":"):
+				continue
+			case strings.HasPrefix(line, "event:"):
+				eventName = strings.TrimSpace(line[len("event:"):])
+			case strings.HasPrefix(line, "data:"):
+				dataLines = append(dataLines, strings.TrimSpace(line[len("data:"):]))
+			default:
+				dataLines = append(dataLines, strings.TrimSpace(line))
 			}
-			flusher.Flush()
 		}
+
 		if err == nil {
 			continue
 		}
 		if errors.Is(err, io.EOF) {
-			// 发送结束事件
-			c.SSEvent("done", gin.H{"ok": true})
-			flusher.Flush()
+			if flushEvent() {
+				return
+			}
+			a.emitSSE(c, flusher, "done", gin.H{"ok": true})
 			return
 		}
-		// 其他错误
-		c.SSEvent("error", gin.H{"msg": err.Error()})
-		flusher.Flush()
+
+		a.emitSSE(c, flusher, "error", gin.H{"message": err.Error()})
+		a.emitSSE(c, flusher, "done", gin.H{"ok": true})
 		return
 	}
+}
+
+func extractPayloadError(payload map[string]any) string {
+	if msg := firstString(
+		payload["message"],
+		payload["msg"],
+		payload["error_description"],
+		payload["detail"],
+	); msg != "" {
+		return msg
+	}
+	if errObj, ok := payload["error"].(map[string]any); ok {
+		if msg := firstString(errObj["message"], errObj["msg"], errObj["detail"]); msg != "" {
+			return msg
+		}
+	}
+	if errText := strings.TrimSpace(toString(payload["error"])); errText != "" {
+		return errText
+	}
+	return ""
+}
+
+func extractPayloadDelta(payload any) string {
+	switch t := payload.(type) {
+	case string:
+		return t
+	case map[string]any:
+		if choices, ok := t["choices"].([]any); ok {
+			parts := make([]string, 0, len(choices))
+			for _, row := range choices {
+				choice, ok := row.(map[string]any)
+				if !ok {
+					continue
+				}
+				if deltaObj, ok := choice["delta"].(map[string]any); ok {
+					if content := toString(deltaObj["content"]); content != "" {
+						parts = append(parts, content)
+					}
+				}
+				if messageObj, ok := choice["message"].(map[string]any); ok {
+					if content := toString(messageObj["content"]); content != "" {
+						parts = append(parts, content)
+					}
+				}
+				if text := toString(choice["text"]); text != "" {
+					parts = append(parts, text)
+				}
+			}
+			if len(parts) > 0 {
+				return strings.Join(parts, "")
+			}
+		}
+
+		if deltaObj, ok := t["delta"].(map[string]any); ok {
+			if content := toString(deltaObj["content"]); content != "" {
+				return content
+			}
+		}
+		if content := toString(t["content"]); content != "" {
+			return content
+		}
+		if output := toString(t["output_text"]); output != "" {
+			return output
+		}
+	}
+	return ""
+}
+
+func isPayloadDone(payload map[string]any) bool {
+	if toBool(payload["done"]) || toBool(payload["is_end"]) || toBool(payload["finish"]) {
+		return true
+	}
+
+	choices, ok := payload["choices"].([]any)
+	if !ok {
+		return false
+	}
+	for _, row := range choices {
+		choice, ok := row.(map[string]any)
+		if !ok {
+			continue
+		}
+		if strings.TrimSpace(toString(choice["finish_reason"])) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func extractUpstreamError(raw, statusText string) string {
@@ -288,5 +447,33 @@ func toString(v any) string {
 		return string(t)
 	default:
 		return ""
+	}
+}
+
+func toBool(v any) bool {
+	switch t := v.(type) {
+	case bool:
+		return t
+	case string:
+		s := strings.TrimSpace(strings.ToLower(t))
+		return s == "true" || s == "1" || s == "yes"
+	case float64:
+		return t != 0
+	case float32:
+		return t != 0
+	case int:
+		return t != 0
+	case int64:
+		return t != 0
+	case int32:
+		return t != 0
+	case uint:
+		return t != 0
+	case uint64:
+		return t != 0
+	case uint32:
+		return t != 0
+	default:
+		return false
 	}
 }

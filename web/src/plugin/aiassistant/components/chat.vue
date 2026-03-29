@@ -54,7 +54,7 @@
         :rows="3"
         placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
         :disabled="loading"
-        @keydown.enter.exact="sendMessage"
+        @keydown.enter.exact.prevent="sendMessage"
         resize="none"
       />
       <div class="input-actions">
@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, nextTick, onMounted } from 'vue'
+  import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
   import { ElMessage } from 'element-plus'
   import { chatStream, getEnabledPrompts } from '@/plugin/aiassistant/api/assistant'
   import Markdown from 'markdown-it'
@@ -117,6 +117,7 @@
   const messagesContainer = ref(null)
   const hasSelection = ref(false)
   const selectedText = ref('')
+  const streamController = ref(null)
 
   const canSend = computed(() => {
     return inputMessage.value.trim() && !loading.value
@@ -170,85 +171,39 @@
     await nextTick()
     scrollToBottom()
 
-    try {
-      // 构建消息历史
-      const messagesPayload = messages.value.map((m) => ({
-        role: m.role,
-        content: m.content
-      }))
+    const messagesPayload = messages.value.map((m) => ({
+      role: m.role,
+      content: m.content
+    }))
 
-      const res = await chatStream({
-        messages: messagesPayload,
-        stream: true
-      })
+    const assistantMessage = {
+      role: 'assistant',
+      content: '',
+      createdAt: new Date()
+    }
+    messages.value.push(assistantMessage)
 
-      if (res.code === 0) {
-        // 添加助手消息占位
-        const assistantMessage = {
-          role: 'assistant',
-          content: '',
-          createdAt: new Date()
+    streamController.value = chatStream(
+      { messages: messagesPayload },
+      (delta) => {
+        assistantMessage.content += delta
+        scrollToBottom()
+      },
+      (error) => {
+        ElMessage.error(error?.message || 'AI 响应失败')
+        if (!assistantMessage.content) {
+          assistantMessage.content = `抱歉，发生错误：${error?.message || '未知错误'}`
         }
-        messages.value.push(assistantMessage)
-
-        // 处理流式响应
-        await processStreamResponse(res.data, assistantMessage)
-      } else {
-        throw new Error(res.msg || '请求失败')
+        loading.value = false
+        streamController.value = null
+      },
+      async () => {
+        loading.value = false
+        streamController.value = null
+        await nextTick()
+        scrollToBottom()
       }
-    } catch (error) {
-      ElMessage.error(error.message || 'AI 响应失败')
-      // 添加错误消息
-      messages.value.push({
-        role: 'assistant',
-        content: `抱歉，发生错误：${error.message}`,
-        createdAt: new Date()
-      })
-    } finally {
-      loading.value = false
-      await nextTick()
-      scrollToBottom()
-    }
-  }
-
-  // 处理流式响应
-  const processStreamResponse = async (streamData, messageObj) => {
-    if (!streamData) return
-
-    // 如果是字符串，尝试解析
-    let content = ''
-    
-    if (typeof streamData === 'string') {
-      // 处理 SSE 格式
-      const lines = streamData.split('\n')
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6)
-          if (data === '[DONE]') continue
-          try {
-            const parsed = JSON.parse(data)
-            const delta = parsed.choices?.[0]?.delta?.content
-            if (delta) {
-              content += delta
-              messageObj.content = content
-            }
-          } catch (e) {
-            // 忽略解析错误
-          }
-        }
-      }
-    }
-
-    // 如果没有解析到内容，直接使用返回数据
-    if (!content && streamData) {
-      content = typeof streamData === 'object' 
-        ? JSON.stringify(streamData) 
-        : streamData
-      messageObj.content = content
-    }
-
-    await nextTick()
-    scrollToBottom()
+    )
   }
 
   // 滚动到底部
@@ -292,6 +247,14 @@
     // 如果有初始提示
     if (props.initialPrompt) {
       inputMessage.value = props.initialPrompt
+    }
+  })
+
+  onUnmounted(() => {
+    document.removeEventListener('selectionchange', handleSelectionChange)
+    if (streamController.value) {
+      streamController.value.abort()
+      streamController.value = null
     }
   })
 </script>

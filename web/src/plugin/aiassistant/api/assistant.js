@@ -146,6 +146,85 @@ export const getEnabledPrompts = () => {
 
 // ======================= AI 聊天（SSE 流式） =======================
 
+const joinPath = (base, path) => {
+  const cleanBase = (base || '').replace(/\/+$/, '')
+  if (!path) return cleanBase
+  return `${cleanBase}/${path.replace(/^\/+/, '')}`
+}
+
+const parseSSEEvent = (eventRaw) => {
+  const lines = eventRaw.split(/\r?\n/)
+  let event = 'message'
+  const dataParts = []
+
+  for (const rawLine of lines) {
+    if (!rawLine || rawLine.startsWith(':')) continue
+    if (rawLine.startsWith('event:')) {
+      event = rawLine.slice(6).trim() || 'message'
+      continue
+    }
+    if (rawLine.startsWith('data:')) {
+      let data = rawLine.slice(5)
+      if (data.startsWith(' ')) data = data.slice(1)
+      dataParts.push(data.replace(/\r$/, ''))
+      continue
+    }
+    dataParts.push(rawLine.replace(/\r$/, ''))
+  }
+
+  return {
+    event,
+    data: dataParts.join('\n')
+  }
+}
+
+const extractStreamError = (payload, fallback = 'SSE error') => {
+  if (!payload || typeof payload !== 'object') return fallback
+  if (typeof payload.message === 'string' && payload.message.trim()) return payload.message.trim()
+  if (typeof payload.msg === 'string' && payload.msg.trim()) return payload.msg.trim()
+  if (payload.error && typeof payload.error === 'object') {
+    if (typeof payload.error.message === 'string' && payload.error.message.trim()) {
+      return payload.error.message.trim()
+    }
+  }
+  return fallback
+}
+
+const extractStreamDelta = (payload) => {
+  if (typeof payload === 'string') return payload
+  if (!payload || typeof payload !== 'object') return ''
+
+  if (Array.isArray(payload.choices)) {
+    const parts = []
+    payload.choices.forEach((choice) => {
+      const delta = choice?.delta?.content
+      const message = choice?.message?.content
+      const text = choice?.text
+      if (typeof delta === 'string') parts.push(delta)
+      if (typeof message === 'string') parts.push(message)
+      if (typeof text === 'string') parts.push(text)
+    })
+    if (parts.length) return parts.join('')
+  }
+
+  if (typeof payload.content === 'string') return payload.content
+  if (typeof payload.output_text === 'string') return payload.output_text
+  if (typeof payload?.delta?.content === 'string') return payload.delta.content
+
+  return ''
+}
+
+const isStreamDone = (payload) => {
+  if (!payload || typeof payload !== 'object') return false
+  if (payload.done === true || payload.is_end === true || payload.finish === true) return true
+  if (Array.isArray(payload.choices)) {
+    return payload.choices.some((choice) => {
+      return typeof choice?.finish_reason === 'string' && choice.finish_reason.length > 0
+    })
+  }
+  return false
+}
+
 /**
  * 使用 SSE 流式聊天
  * @param {Object} data - 聊天数据
@@ -156,23 +235,32 @@ export const getEnabledPrompts = () => {
  */
 export const chatStream = (data, onMessage, onError, onComplete) => {
   let controller = new AbortController()
-  let isConnected = false
+  let isCompleted = false
 
-  // 立即执行异步操作
+  const completeOnce = () => {
+    if (isCompleted) return
+    isCompleted = true
+    if (onComplete) onComplete()
+  }
+
+  const errorOnce = (error) => {
+    if (isCompleted) return
+    if (onError) onError(error instanceof Error ? error : new Error(String(error)))
+  }
+
   ;(async () => {
     try {
       const { useUserStore } = await import('@/pinia/modules/user')
       const store = useUserStore()
-      const token = store.token
-      const userId = store.userInfo.ID
-
-      const baseURL = import.meta.env.VITE_BASE_API
-      const url = `${baseURL}/aiAssistant/chat`
+      const token = store.token || ''
+      const userId = store.userInfo?.ID || ''
+      const url = joinPath(import.meta.env.VITE_BASE_API, '/aiAssistant/chat')
 
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'text/event-stream, application/json',
           'x-token': token,
           'x-user-id': userId
         },
@@ -184,82 +272,60 @@ export const chatStream = (data, onMessage, onError, onComplete) => {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.msg || `HTTP ${response.status}`)
+        const errorText = await response.text()
+        let msg = `HTTP ${response.status}`
+        try {
+          const errorData = JSON.parse(errorText)
+          msg = errorData?.msg || errorData?.message || msg
+        } catch {
+          if (errorText?.trim()) msg = errorText.trim()
+        }
+        throw new Error(msg)
       }
 
-      isConnected = true
+      if (!response.body) {
+        throw new Error('SSE response body is empty')
+      }
+
       const reader = response.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let buffer = ''
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done) {
+          if (buffer.trim()) {
+            const event = parseSSEEvent(buffer)
+            const finished = handleSSEParsedEvent(event, onMessage, errorOnce)
+            if (finished) {
+              completeOnce()
+              return
+            }
+          }
+          break
+        }
 
         buffer += decoder.decode(value, { stream: true })
+        const events = buffer.split(/\r?\n\r?\n/)
+        buffer = events.pop() || ''
 
-        // 处理 SSE 格式
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // 保留不完整行
-
-        for (const line of lines) {
-          const trimmedLine = line.trim()
-          if (!trimmedLine || trimmedLine.startsWith(':')) continue
-
-          // 解析 SSE 事件
-          if (trimmedLine.startsWith('event: ')) {
-            const eventType = trimmedLine.slice(7)
-            // 读取下一行 data
-            const nextLine = lines.shift()
-            if (nextLine && nextLine.trim().startsWith('data: ')) {
-              const dataStr = nextLine.trim().slice(6)
-              try {
-                const parsed = JSON.parse(dataStr)
-                
-                switch (eventType) {
-                  case 'meta':
-                    // 连接建立，无需处理
-                    break
-                  case 'error':
-                    if (onError) onError(new Error(parsed.msg || 'SSE error'))
-                    return
-                  case 'done':
-                    if (onComplete) onComplete()
-                    return
-                }
-              } catch (e) {
-                console.warn('SSE 事件解析失败:', e)
-              }
-            }
-            continue
-          }
-
-          // 解析 data 行（AI 原始内容）
-          if (trimmedLine.startsWith('data: ')) {
-            const dataStr = trimmedLine.slice(6)
-            if (dataStr === '[DONE]') continue
-
-            try {
-              const parsed = JSON.parse(dataStr)
-              const delta = parsed.choices?.[0]?.delta?.content
-              if (delta) {
-                onMessage(delta)
-              }
-            } catch (e) {
-              console.warn('SSE data 解析失败:', e)
-            }
+        for (const eventRaw of events) {
+          if (!eventRaw.trim()) continue
+          const event = parseSSEEvent(eventRaw)
+          const finished = handleSSEParsedEvent(event, onMessage, errorOnce)
+          if (finished) {
+            completeOnce()
+            return
           }
         }
       }
 
-      if (onComplete) onComplete()
+      completeOnce()
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('SSE 请求已取消')
         return
       }
-      if (onError) onError(error)
+      errorOnce(error)
     }
   })()
 
@@ -271,6 +337,41 @@ export const chatStream = (data, onMessage, onError, onComplete) => {
       }
     }
   }
+}
+
+const handleSSEParsedEvent = (event, onMessage, onError) => {
+  const dataLine = (event.data || '').trim()
+  const eventType = event.event || 'message'
+
+  if (!dataLine) return false
+  if (dataLine === '[DONE]' || eventType === 'done') return true
+
+  let payload = dataLine
+  if (dataLine.startsWith('{') || dataLine.startsWith('[')) {
+    try {
+      payload = JSON.parse(dataLine)
+    } catch {
+      payload = dataLine
+    }
+  }
+
+  if (eventType === 'meta') return false
+  if (eventType === 'error') {
+    const msg = extractStreamError(payload, dataLine)
+    if (onError) onError(new Error(msg))
+    return true
+  }
+
+  const delta = extractStreamDelta(payload)
+  if (typeof delta === 'string' && delta.length > 0 && onMessage) {
+    onMessage(delta)
+  }
+
+  if (payload && typeof payload === 'object' && isStreamDone(payload)) {
+    return true
+  }
+
+  return false
 }
 
 // 非流式聊天（备用）

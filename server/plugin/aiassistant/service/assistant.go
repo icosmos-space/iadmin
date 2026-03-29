@@ -1,4 +1,4 @@
-﻿package service
+package service
 
 import (
 	"bytes"
@@ -233,7 +233,7 @@ func (s *assistant) RequestChat(ctx context.Context, in aiReq.ChatReq) (*http.Re
 func buildMessages(in aiReq.ChatReq) []openAIMessage {
 	list := make([]openAIMessage, 0, len(in.Messages)+1)
 	for _, msg := range in.Messages {
-		content := strings.TrimSpace(msg.Content)
+		content := composeMessageContent(msg.Content, msg.Attachments)
 		if content == "" {
 			continue
 		}
@@ -251,10 +251,38 @@ func buildMessages(in aiReq.ChatReq) []openAIMessage {
 	if question == "" {
 		question = strings.TrimSpace(in.Prompt)
 	}
-	if question == "" {
+	content := composeMessageContent(question, in.Attachments)
+	if content == "" {
 		return nil
 	}
-	return []openAIMessage{{Role: "user", Content: question}}
+	return []openAIMessage{{Role: "user", Content: content}}
+}
+
+func composeMessageContent(text string, attachments []aiReq.ChatAttachment) string {
+	baseText := strings.TrimSpace(text)
+	urlLines := make([]string, 0, len(attachments))
+	for _, item := range attachments {
+		url := strings.TrimSpace(item.URL)
+		if url == "" {
+			continue
+		}
+		name := strings.TrimSpace(item.Name)
+		if name == "" {
+			urlLines = append(urlLines, "- "+url)
+			continue
+		}
+		urlLines = append(urlLines, "- "+name+": "+url)
+	}
+
+	if len(urlLines) == 0 {
+		return baseText
+	}
+
+	attachmentText := "附件 URL:\n" + strings.Join(urlLines, "\n")
+	if baseText == "" {
+		return "请结合以下内容分析：\n" + attachmentText
+	}
+	return baseText + "\n\n" + attachmentText
 }
 
 func normalizeRole(role string) string {

@@ -1,4 +1,4 @@
-﻿package request
+package request
 
 import commonReq "github.com/icosmos-space/iadmin/server/model/common/request"
 
@@ -18,15 +18,24 @@ type UpdateConfigReq struct {
 }
 
 type ChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role        string           `json:"role"`
+	Content     string           `json:"content"`
+	Attachments []ChatAttachment `json:"attachments"`
+}
+
+type ChatAttachment struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	Type string `json:"type"`
+	Size int64  `json:"size"`
 }
 
 type ChatReq struct {
-	Message  string        `json:"message"`
-	Question string        `json:"question"`
-	Prompt   string        `json:"prompt"`
-	Model    string        `json:"model"`
-	Stream   bool          `json:"stream"`
-	Messages []ChatMessage `json:"messages"`
+	Message     string           `json:"message"`
+	Question    string           `json:"question"`
+	Prompt      string           `json:"prompt"`
+	Model       string           `json:"model"`
+	Stream      bool             `json:"stream"`
+	Messages    []ChatMessage    `json:"messages"`
+	Attachments []ChatAttachment `json:"attachments"`
 }
