@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/icosmos-space/iadmin/server/constant"
 	sysModel "github.com/icosmos-space/iadmin/server/model/system"
 	"github.com/icosmos-space/iadmin/server/service/system"
 	"github.com/icosmos-space/iadmin/server/utils"
@@ -60,9 +61,9 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			UUID:        uuid.New(),
 			Username:    "admin",
 			Password:    adminPassword,
-			NickName:    "icosmos-space",
+			NickName:    constant.RoleSuperAdminName,
 			HeaderImg:   "https://avatars.githubusercontent.com/u/5282810?v=4&size=64",
-			AuthorityId: 888,
+			AuthorityId: constant.RoleSuperAdminID,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com",
 		},
@@ -70,9 +71,9 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			UUID:        uuid.New(),
 			Username:    "a303176530",
 			Password:    password,
-			NickName:    "用户1",
+			NickName:    constant.RoleSystemAdminName,
 			HeaderImg:   "https://avatars.githubusercontent.com/u/5282810?v=4&size=64",
-			AuthorityId: 9528,
+			AuthorityId: constant.RoleSystemAdminID,
 			Phone:       "17611111111",
 			Email:       "333333333@qq.com"},
 	}
@@ -103,5 +104,5 @@ func (i *initUser) DataInserted(ctx context.Context) bool {
 		Preload("Authorities").First(&record).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}
-	return len(record.Authorities) > 0 && record.Authorities[0].AuthorityId == 888
+	return len(record.Authorities) > 0 && record.Authorities[0].AuthorityId == constant.RoleSuperAdminID
 }
