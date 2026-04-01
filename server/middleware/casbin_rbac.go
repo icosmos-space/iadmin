@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/icosmos-space/iadmin/server/constant"
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/utils"
@@ -14,6 +15,13 @@ import (
 func CasbinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		waitUse, _ := utils.GetClaims(c)
+
+		// 检查是否为超级管理员，如果是则直接放行
+		if waitUse.AuthorityId == constant.RoleSuperAdminID {
+			c.Next()
+			return
+		}
+
 		//获取请求的PATH
 		path := c.Request.URL.Path
 		obj := strings.TrimPrefix(path, global.IADMIN_CONFIG.System.RouterPrefix)
