@@ -2,7 +2,10 @@ package system
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+
+	"github.com/icosmos-space/iadmin/server/constant"
 
 	"github.com/icosmos-space/iadmin/server/global"
 	"github.com/icosmos-space/iadmin/server/model/common/request"
@@ -27,18 +30,27 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[ui
 	treeMap = make(map[uint][]system.SysMenu)
 
 	var SysAuthorityMenus []system.SysAuthorityMenu
-	err = global.IADMIN_DB.Where("sys_authority_authority_id = ?", authorityId).Find(&SysAuthorityMenus).Error
-	if err != nil {
-		return
+	fmt.Println("authorityId", authorityId, constant.RoleSuperAdminID, authorityId == constant.RoleSuperAdminID)
+
+	if authorityId == constant.RoleSuperAdminID {
+		fmt.Println("进入获取超级管理员菜单树", authorityId)
+
+		err = global.IADMIN_DB.Order("sort").Preload("Parameters").Find(&baseMenu).Error
+	} else {
+		fmt.Println("进入获取非超级管理员菜单树", authorityId)
+		err = global.IADMIN_DB.Where("sys_authority_authority_id = ?", authorityId).Find(&SysAuthorityMenus).Error
+		if err != nil {
+			return
+		}
+
+		var MenuIds []string
+
+		for i := range SysAuthorityMenus {
+			MenuIds = append(MenuIds, SysAuthorityMenus[i].MenuId)
+		}
+
+		err = global.IADMIN_DB.Where("id in (?)", MenuIds).Order("sort").Preload("Parameters").Find(&baseMenu).Error
 	}
-
-	var MenuIds []string
-
-	for i := range SysAuthorityMenus {
-		MenuIds = append(MenuIds, SysAuthorityMenus[i].MenuId)
-	}
-
-	err = global.IADMIN_DB.Where("id in (?)", MenuIds).Order("sort").Preload("Parameters").Find(&baseMenu).Error
 	if err != nil {
 		return
 	}
@@ -52,7 +64,12 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[ui
 		})
 	}
 
-	err = global.IADMIN_DB.Where("authority_id = ?", authorityId).Preload("SysBaseMenuBtn").Find(&btns).Error
+	if authorityId == constant.RoleSuperAdminID {
+		err = global.IADMIN_DB.Preload("SysBaseMenuBtn").Find(&btns).Error
+	} else {
+		fmt.Println("进入获取非超级管理员菜单树", authorityId)
+		err = global.IADMIN_DB.Where("authority_id = ?", authorityId).Preload("SysBaseMenuBtn").Find(&btns).Error
+	}
 	if err != nil {
 		return
 	}

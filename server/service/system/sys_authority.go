@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/icosmos-space/iadmin/server/constant"
 	systemReq "github.com/icosmos-space/iadmin/server/model/system/request"
 
 	"github.com/icosmos-space/iadmin/server/global"
@@ -190,7 +191,7 @@ func (authorityService *AuthorityService) GetAuthorityInfoList(authorityID uint)
 		return nil, err
 	}
 	var authorities []system.SysAuthority
-	db := global.IADMIN_DB.Model(&system.SysAuthority{})
+	db := global.IADMIN_DB.Model(&system.SysAuthority{}).Where("authority_id != ?", constant.RoleSuperAdminID)
 	if global.IADMIN_CONFIG.System.UseStrictAuth {
 		// 当开启了严格树形结构后
 		if *authority.ParentId == 0 {
