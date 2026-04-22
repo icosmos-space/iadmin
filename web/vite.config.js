@@ -13,7 +13,7 @@ import UnoCSS from '@unocss/vite'
 
 // @see https://cn.vitejs.dev/config/
 export default ({ mode }) => {
-  AddSecret('')
+  AddSecret('icosmos.space')
   const env = loadEnv(mode, process.cwd())
   viteLogo(env)
 

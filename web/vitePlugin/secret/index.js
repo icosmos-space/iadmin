@@ -2,5 +2,5 @@ export function AddSecret(secret) {
   if (!secret) {
     secret = ''
   }
-  global['gva-secret'] = secret
+  global['iadmin-secret'] = secret
 }
