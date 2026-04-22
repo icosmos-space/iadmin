@@ -24,9 +24,15 @@
             placeholder="请选择作者"
             style="width: 100%"
             :clearable="true"
+            filterable
+            remote
+            reserve-keyword
+            :loading="dataSourceLoading.userID"
+            :remote-method="(keyword) => handleDataSourceSearch('userID', keyword)"
+            @visible-change="(visible) => handleDataSourceVisibleChange('userID', visible)"
           >
             <el-option
-              v-for="(item, key) in dataSource.userID"
+              v-for="(item, key) in dataSourceOptions.userID"
               :key="key"
               :label="item.label"
               :value="item.value"
@@ -79,14 +85,42 @@
   const rule = reactive({})
 
   const elFormRef = ref()
-  const dataSource = ref([])
-  const getDataSourceFunc = async () => {
-    const res = await getInfoDataSource()
-    if (res.code === 0) {
-      dataSource.value = res.data
+  const dataSourceOptions = reactive({
+    userID: []
+  })
+  const dataSourceLoading = reactive({
+    userID: false
+  })
+  const dataSourcePage = reactive({
+    userID: 1
+  })
+
+  const loadDataSource = async (field, keyword = '', reset = true) => {
+    if (reset) {
+      dataSourcePage[field] = 1
+    }
+    dataSourceLoading[field] = true
+    const res = await getInfoDataSource({
+      field,
+      keyword,
+      page: dataSourcePage[field],
+      pageSize: 20
+    })
+    dataSourceLoading[field] = false
+    if (res.code !== 0) return
+    dataSourceOptions[field] = res.data?.list || []
+  }
+
+  const handleDataSourceSearch = (field, keyword) => {
+    loadDataSource(field, keyword, true)
+  }
+
+  const handleDataSourceVisibleChange = (field, visible) => {
+    if (!visible) return
+    if (dataSourceOptions[field].length === 0) {
+      loadDataSource(field, '', true)
     }
   }
-  getDataSourceFunc()
 
   // 初始化方法
   const init = async () => {
