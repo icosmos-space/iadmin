@@ -3,6 +3,7 @@ package {{.Package}}
 import (
 	{{if not .OnlyTemplate}}
 	"{{.Module}}/global"
+    commonReq "{{.Module}}/model/common/request"
     "{{.Module}}/model/common/response"
     "{{.Module}}/model/{{.Package}}"
     {{- if not .IsTree}}
@@ -227,8 +228,14 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Get{{.StructName}}DataSource(c *
     // 创建业务用Context
     ctx := c.Request.Context()
 
+    var query commonReq.DataSourceQuery
+    if err := c.ShouldBindQuery(&query); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
     // 此接口为获取数据源定义的数据
-    dataSource, err := {{.Abbreviation}}Service.Get{{.StructName}}DataSource(ctx)
+    dataSource, err := {{.Abbreviation}}Service.Get{{.StructName}}DataSource(ctx, query)
     if err != nil {
         global.GVA_LOG.Error("查询失败!", zap.Error(err))
    		response.FailWithMessage("查询失败:" + err.Error(), c)

@@ -34,12 +34,15 @@ import (
 {{- if not .OnlyTemplate }}
 	"context"
 	"{{.Module}}/global"
+	commonReq "{{.Module}}/model/common/request"
 	"{{.Module}}/plugin/{{.Package}}/model"
 	{{- if not .IsTree }}
     "{{.Module}}/plugin/{{.Package}}/model/request"
     {{- else }}
-    "errors"
     {{- end }}
+	{{- if or .IsTree .HasDataSource }}
+	"errors"
+	{{- end }}
     {{- if .AutoCreateResource }}
     "gorm.io/gorm"
     {{- end}}
@@ -193,13 +196,51 @@ func (s *{{.Abbreviation}}) Get{{.StructName}}InfoList(ctx context.Context, info
 }
 {{- end }}
 {{- if .HasDataSource }}
-func (s *{{.Abbreviation}})Get{{.StructName}}DataSource(ctx context.Context) (res map[string][]map[string]any, err error) {
-	res = make(map[string][]map[string]any)
+func (s *{{.Abbreviation}})Get{{.StructName}}DataSource(ctx context.Context, info commonReq.DataSourceQuery) (res commonReq.DataSourceResult, err error) {
+	if info.Page <= 0 {
+		info.Page = 1
+	}
+	switch {
+	case info.PageSize > 100:
+		info.PageSize = 100
+	case info.PageSize <= 0:
+		info.PageSize = 20
+	}
+
+	offset := (info.Page - 1) * info.PageSize
+	res.Page = info.Page
+	res.PageSize = info.PageSize
+	res.List = make([]map[string]any, 0)
+
+	switch info.Field {
 	{{range $key, $value := .DataSourceMap}}
-	   {{$key}} := make([]map[string]any, 0)
-	   {{$db}}.Table("{{$value.Table}}"){{- if $value.HasDeletedAt}}.Where("deleted_at IS NULL"){{ end }}.Select("{{$value.Label}} as label,{{$value.Value}} as value").Scan(&{{$key}})
-	   res["{{$key}}"] = {{$key}}
+	case "{{$key}}":
+		{{ $dataDB := "" }}
+		{{- if eq $value.DBName "" }}
+		{{ $dataDB = $db }}
+		{{- else}}
+		{{ $dataDB = printf "global.MustGetGlobalDBByDBName(\"%s\")" $value.DBName }}
+		{{- end}}
+		db := {{$dataDB}}.Table("{{$value.Table}}")
+		{{- if $value.HasDeletedAt}}
+		db = db.Where("deleted_at IS NULL")
+		{{- end }}
+		if info.Keyword != "" {
+			db = db.Where("{{$value.Label}} LIKE ?", "%"+info.Keyword+"%")
+		}
+		if err = db.Count(&res.Total).Error; err != nil {
+			return
+		}
+		err = db.Select("{{$value.Label}} as label,{{$value.Value}} as value").Order("{{$value.Value}} desc").Offset(offset).Limit(info.PageSize).Scan(&res.List).Error
+		if err != nil {
+			return
+		}
 	{{- end }}
+	default:
+		err = errors.New("invalid datasource field")
+		return
+	}
+	res.HasMore = int64(offset+len(res.List)) < res.Total
 	return
 }
 {{- end }}

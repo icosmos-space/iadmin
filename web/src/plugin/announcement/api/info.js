@@ -102,9 +102,10 @@ export const getInfoList = (params) => {
 // @Produce application/json
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
 // @Router /info/findInfoDataSource [get]
-export const getInfoDataSource = () => {
+export const getInfoDataSource = (params) => {
   return service({
     url: '/info/getInfoDataSource',
-    method: 'get'
+    method: 'get',
+    params
   })
 }

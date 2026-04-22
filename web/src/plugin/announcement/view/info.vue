@@ -108,9 +108,7 @@
         <el-table-column align="left" label="标题" prop="title" width="120" />
         <el-table-column align="left" label="作者" prop="userID" width="120">
           <template #default="scope">
-            <span>{{
-              filterDataSource(dataSource.userID, scope.row.userID)
-            }}</span>
+            <span>{{ getDataSourceLabel('userID', scope.row.userID) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="附件" prop="attachments" width="200">
@@ -205,9 +203,15 @@
             placeholder="请选择作者"
             style="width: 100%"
             :clearable="true"
+            filterable
+            remote
+            reserve-keyword
+            :loading="dataSourceLoading.userID"
+            :remote-method="(keyword) => handleDataSourceSearch('userID', keyword)"
+            @visible-change="(visible) => handleDataSourceVisibleChange('userID', visible)"
           >
             <el-option
-              v-for="(item, key) in dataSource.userID"
+              v-for="(item, key) in dataSourceOptions.userID"
               :key="key"
               :label="item.label"
               :value="item.value"
@@ -239,9 +243,9 @@
   import SelectFile from '@/components/selectFile/selectFile.vue'
 
   // 全量引入格式化工具 请按需保留
-  import { formatDate, filterDataSource } from '@/utils/format'
+  import { formatDate } from '@/utils/format'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { ref, reactive } from 'vue'
+  import { ref, reactive, computed } from 'vue'
 
   defineOptions({
     name: 'Info'
@@ -257,14 +261,69 @@
     userID: undefined,
     attachments: []
   })
-  const dataSource = ref([])
-  const getDataSourceFunc = async () => {
-    const res = await getInfoDataSource()
-    if (res.code === 0) {
-      dataSource.value = res.data
+  const dataSourceOptions = reactive({
+    userID: []
+  })
+  const dataSourceLoading = reactive({
+    userID: false
+  })
+  const dataSourcePage = reactive({
+    userID: 1
+  })
+  const dataSourceHasMore = reactive({
+    userID: false
+  })
+
+  const dataSourceLabelMap = computed(() => {
+    const map = {}
+    Object.keys(dataSourceOptions).forEach((field) => {
+      map[field] = {}
+      ;(dataSourceOptions[field] || []).forEach((item) => {
+        map[field][item.value] = item.label
+      })
+    })
+    return map
+  })
+  const getDataSourceLabel = (field, value) => {
+    if (value === null || value === undefined) return '-'
+    return dataSourceLabelMap.value[field]?.[value] ?? value
+  }
+
+  const loadDataSource = async (field, keyword = '', reset = true) => {
+    if (reset) {
+      dataSourcePage[field] = 1
+    }
+    dataSourceLoading[field] = true
+    const res = await getInfoDataSource({
+      field,
+      keyword,
+      page: dataSourcePage[field],
+      pageSize: 20
+    })
+    dataSourceLoading[field] = false
+    if (res.code !== 0) return
+
+    const list = res.data?.list || []
+    if (reset) {
+      dataSourceOptions[field] = list
+    } else {
+      dataSourceOptions[field] = dataSourceOptions[field].concat(list)
+    }
+    dataSourceHasMore[field] = !!res.data?.hasMore
+  }
+
+  const handleDataSourceSearch = (field, keyword) => {
+    loadDataSource(field, keyword, true)
+  }
+
+  const handleDataSourceVisibleChange = (field, visible) => {
+    if (!visible) return
+    if (dataSourceOptions[field].length === 0) {
+      loadDataSource(field, '', true)
     }
   }
-  getDataSourceFunc()
+
+  loadDataSource('userID', '', true)
 
   // 验证规则
   const rule = reactive({})

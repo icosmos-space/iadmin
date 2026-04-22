@@ -1,7 +1,9 @@
 package service
 
 import (
+	"errors"
 	"github.com/icosmos-space/iadmin/server/global"
+	commonReq "github.com/icosmos-space/iadmin/server/model/common/request"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model/request"
 )
@@ -68,11 +70,36 @@ func (s *info) GetInfoInfoList(info request.InfoSearch) (list []model.Info, tota
 	err = db.Find(&infos).Error
 	return infos, total, err
 }
-func (s *info) GetInfoDataSource() (res map[string][]map[string]any, err error) {
-	res = make(map[string][]map[string]any)
+func (s *info) GetInfoDataSource(info commonReq.DataSourceQuery) (res commonReq.DataSourceResult, err error) {
+	if info.Page <= 0 {
+		info.Page = 1
+	}
+	switch {
+	case info.PageSize > 100:
+		info.PageSize = 100
+	case info.PageSize <= 0:
+		info.PageSize = 20
+	}
+	offset := (info.Page - 1) * info.PageSize
+	res.Page = info.Page
+	res.PageSize = info.PageSize
+	res.List = make([]map[string]any, 0)
 
-	userID := make([]map[string]any, 0)
-	global.IADMIN_DB.Table("sys_users").Select("nick_name as label,id as value").Scan(&userID)
-	res["userID"] = userID
+	switch info.Field {
+	case "userID":
+		db := global.IADMIN_DB.Table("sys_users")
+		if info.Keyword != "" {
+			db = db.Where("nick_name LIKE ?", "%"+info.Keyword+"%")
+		}
+		if err = db.Count(&res.Total).Error; err != nil {
+			return
+		}
+		err = db.Select("nick_name as label,id as value").Order("id desc").Offset(offset).Limit(info.PageSize).Scan(&res.List).Error
+	default:
+		err = errors.New("invalid datasource field")
+		return
+	}
+
+	res.HasMore = int64(offset+len(res.List)) < res.Total
 	return
 }

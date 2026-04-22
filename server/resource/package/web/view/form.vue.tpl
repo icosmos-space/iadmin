@@ -50,14 +50,20 @@ const {{ $element }}Options = ref([])
 get{{.StructName}}DataSource,
 
 //  获取数据源
-const dataSource = ref([])
-const getDataSourceFunc = async()=>{
-  const res = await get{{.StructName}}DataSource()
+const dataSource = ref({})
+const dataSourceLoading = ref({})
+const fetchDataSource = async (field, keyword = '') => {
+  dataSourceLoading.value[field] = true
+  const res = await get{{.StructName}}DataSource({ field, keyword, page: 1, pageSize: 20 })
+  dataSourceLoading.value[field] = false
   if (res.code === 0) {
-    dataSource.value = res.data
+    dataSource.value[field] = res.data?.list || []
   }
 }
-getDataSourceFunc()
+const onDataSourceVisibleChange = (field, visible) => {
+  if (!visible || (dataSource.value[field] && dataSource.value[field].length > 0)) return
+  fetchDataSource(field)
+}
 {{- end }}
 {{- else }}
 {{- if not .OnlyTemplate }}
@@ -198,14 +204,20 @@ const rule = reactive({
 const elFormRef = ref()
 
 {{- if .HasDataSource }}
-  const dataSource = ref([])
-  const getDataSourceFunc = async()=>{
-    const res = await get{{.StructName}}DataSource()
+  const dataSource = ref({})
+  const dataSourceLoading = ref({})
+  const fetchDataSource = async (field, keyword = '') => {
+    dataSourceLoading.value[field] = true
+    const res = await get{{.StructName}}DataSource({ field, keyword, page: 1, pageSize: 20 })
+    dataSourceLoading.value[field] = false
     if (res.code === 0) {
-      dataSource.value = res.data
+      dataSource.value[field] = res.data?.list || []
     }
   }
-  getDataSourceFunc()
+  const onDataSourceVisibleChange = (field, visible) => {
+    if (!visible || (dataSource.value[field] && dataSource.value[field].length > 0)) return
+    fetchDataSource(field)
+  }
 {{- end }}
 
 // 初始化方法

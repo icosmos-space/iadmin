@@ -4,7 +4,7 @@
           {{- if .Form}}
 <el-form-item label="{{.FieldDesc}}:"  prop="{{.FieldJson}}" >
           {{- if .CheckDataSource}}
-    <el-select {{if eq .DataSource.Association 2}} multiple {{ end }} v-model="formData.{{.FieldJson}}" placeholder="请选择{{.FieldDesc}}" style="width:100%" :clearable="{{.Clearable}}" >
+    <el-select {{if eq .DataSource.Association 2}} multiple {{ end }} v-model="formData.{{.FieldJson}}" placeholder="请选择{{.FieldDesc}}" style="width:100%" :clearable="{{.Clearable}}" filterable remote reserve-keyword :loading="dataSourceLoading.{{.FieldJson}}" :remote-method="(keyword)=>fetchDataSource('{{.FieldJson}}', keyword)" @visible-change="(visible)=>onDataSourceVisibleChange('{{.FieldJson}}', visible)">
         <el-option v-for="(item,key) in dataSource.{{.FieldJson}}" :key="key" :label="item.label" :value="item.value" />
     </el-select>
           {{- else }}
@@ -150,14 +150,20 @@ const {{ $element }}Options = ref([])
 get{{.StructName}}DataSource,
 
 //  获取数据源
-const dataSource = ref([])
-const getDataSourceFunc = async()=>{
-  const res = await get{{.StructName}}DataSource()
+const dataSource = ref({})
+const dataSourceLoading = ref({})
+const fetchDataSource = async (field, keyword = '') => {
+  dataSourceLoading.value[field] = true
+  const res = await get{{.StructName}}DataSource({ field, keyword, page: 1, pageSize: 20 })
+  dataSourceLoading.value[field] = false
   if (res.code === 0) {
-    dataSource.value = res.data
+    dataSource.value[field] = res.data?.list || []
   }
 }
-getDataSourceFunc()
+const onDataSourceVisibleChange = (field, visible) => {
+  if (!visible || (dataSource.value[field] && dataSource.value[field].length > 0)) return
+  fetchDataSource(field)
+}
 {{- end }}
 {{- else }}
 {{- if not .OnlyTemplate }}
@@ -183,7 +189,7 @@ getDataSourceFunc()
       {{- if .Form }}
         <el-form-item label="{{.FieldDesc}}:" prop="{{.FieldJson}}">
        {{- if .CheckDataSource}}
-        <el-select {{if eq .DataSource.Association 2}} multiple {{ end }} v-model="formData.{{.FieldJson}}" placeholder="请选择{{.FieldDesc}}" style="width:100%" :clearable="{{.Clearable}}" >
+        <el-select {{if eq .DataSource.Association 2}} multiple {{ end }} v-model="formData.{{.FieldJson}}" placeholder="请选择{{.FieldDesc}}" style="width:100%" :clearable="{{.Clearable}}" filterable remote reserve-keyword :loading="dataSourceLoading.{{.FieldJson}}" :remote-method="(keyword)=>fetchDataSource('{{.FieldJson}}', keyword)" @visible-change="(visible)=>onDataSourceVisibleChange('{{.FieldJson}}', visible)">
           <el-option v-for="(item,key) in dataSource.{{.FieldJson}}" :key="key" :label="item.label" :value="item.value" />
         </el-select>
        {{- else }}
@@ -388,14 +394,20 @@ const rule = reactive({
 const elFormRef = ref()
 
 {{- if .HasDataSource }}
-  const dataSource = ref([])
-  const getDataSourceFunc = async()=>{
-    const res = await get{{.StructName}}DataSource()
+  const dataSource = ref({})
+  const dataSourceLoading = ref({})
+  const fetchDataSource = async (field, keyword = '') => {
+    dataSourceLoading.value[field] = true
+    const res = await get{{.StructName}}DataSource({ field, keyword, page: 1, pageSize: 20 })
+    dataSourceLoading.value[field] = false
     if (res.code === 0) {
-      dataSource.value = res.data
+      dataSource.value[field] = res.data?.list || []
     }
   }
-  getDataSourceFunc()
+  const onDataSourceVisibleChange = (field, visible) => {
+    if (!visible || (dataSource.value[field] && dataSource.value[field].length > 0)) return
+    fetchDataSource(field)
+  }
 {{- end }}
 
 // 初始化方法

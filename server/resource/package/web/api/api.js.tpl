@@ -105,10 +105,11 @@ export const get{{.StructName}}List = (params) => {
 // @Produce application/json
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
 // @Router /{{.Abbreviation}}/find{{.StructName}}DataSource [get]
-export const get{{.StructName}}DataSource = () => {
+export const get{{.StructName}}DataSource = (params) => {
   return service({
     url: '/{{.Abbreviation}}/get{{.StructName}}DataSource',
     method: 'get',
+    params
   })
 }
 {{- end}}

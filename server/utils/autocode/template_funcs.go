@@ -231,9 +231,9 @@ func GenerateSearchFormItem(field systemReq.AutoCodeField) string {
 		if field.DataSource.Association == 2 {
 			multipleAttr = "multiple "
 		}
-		result += fmt.Sprintf(`  <el-select %sv-model="searchInfo.%s" filterable placeholder="请选择%s" :clearable="%v">
+		result += fmt.Sprintf(`  <el-select %sv-model="searchInfo.%s" filterable remote reserve-keyword placeholder="请选择%s" :loading="dataSourceLoading.%s" :remote-method="(keyword)=>fetchDataSource('%s', keyword)" @visible-change="(visible)=>onDataSourceVisibleChange('%s', visible)" :clearable="%v">
 `,
-			multipleAttr, field.FieldJson, field.FieldDesc, field.Clearable)
+			multipleAttr, field.FieldJson, field.FieldDesc, field.FieldJson, field.FieldJson, field.FieldJson, field.Clearable)
 		result += fmt.Sprintf(`    <el-option v-for="(item,key) in dataSource.%s" :key="key" :label="item.label" :value="item.value" />
 `,
 			field.FieldJson)
@@ -301,7 +301,7 @@ func GenerateTableColumn(field systemReq.AutoCodeField) string {
 `
 
 		if field.DataSource.Association == 2 {
-			result += fmt.Sprintf(`        <el-tag v-for="(item,key) in filterDataSource(dataSource.%s,scope.row.%s)" :key="key">
+			result += fmt.Sprintf(`        <el-tag v-for="(item,key) in getDataSourceLabels("%s", scope.row.%s)" :key="key">
 `,
 				field.FieldJson, field.FieldJson)
 			result += `             {{ item }}
@@ -309,7 +309,7 @@ func GenerateTableColumn(field systemReq.AutoCodeField) string {
 			result += `        </el-tag>
 `
 		} else {
-			result += fmt.Sprintf(`        <span>{{ filterDataSource(dataSource.%s,scope.row.%s) }}</span>
+			result += fmt.Sprintf(`        <span>{{ getDataSourceLabel("%s", scope.row.%s) }}</span>
 `,
 				field.FieldJson, field.FieldJson)
 		}
@@ -470,9 +470,9 @@ func GenerateFormItem(field systemReq.AutoCodeField) string {
 		if field.DataSource.Association == 2 {
 			multipleAttr = " multiple"
 		}
-		result += fmt.Sprintf(`    <el-select%s v-model="formData.%s" placeholder="请选择%s" filterable style="width:100%%" :clearable="%v">
+		result += fmt.Sprintf(`    <el-select%s v-model="formData.%s" placeholder="请选择%s" filterable remote reserve-keyword style="width:100%%" :loading="dataSourceLoading.%s" :remote-method="(keyword)=>fetchDataSource('%s', keyword)" @visible-change="(visible)=>onDataSourceVisibleChange('%s', visible)" :clearable="%v">
 `,
-			multipleAttr, field.FieldJson, field.FieldDesc, field.Clearable)
+			multipleAttr, field.FieldJson, field.FieldDesc, field.FieldJson, field.FieldJson, field.FieldJson, field.Clearable)
 		result += fmt.Sprintf(`        <el-option v-for="(item,key) in dataSource.%s" :key="key" :label="item.label" :value="item.value" />
 `,
 			field.FieldJson)
@@ -589,7 +589,7 @@ func GenerateDescriptionItem(field systemReq.AutoCodeField) string {
 		result += `    <template #default="scope">
 `
 		if field.DataSource.Association == 2 {
-			result += fmt.Sprintf(`        <el-tag v-for="(item,key) in filterDataSource(dataSource.%s,detailForm.%s)" :key="key">
+			result += fmt.Sprintf(`        <el-tag v-for="(item,key) in getDataSourceLabels("%s", detailForm.%s)" :key="key">
 `,
 				field.FieldJson, field.FieldJson)
 			result += `             {{ item }}
@@ -597,7 +597,7 @@ func GenerateDescriptionItem(field systemReq.AutoCodeField) string {
 			result += `        </el-tag>
 `
 		} else {
-			result += fmt.Sprintf(`        <span>{{ filterDataSource(dataSource.%s,detailForm.%s) }}</span>
+			result += fmt.Sprintf(`        <span>{{ getDataSourceLabel("%s", detailForm.%s) }}</span>
 `,
 				field.FieldJson, field.FieldJson)
 		}

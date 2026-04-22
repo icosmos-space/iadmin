@@ -290,9 +290,9 @@ import ArrayCtrl from '@/components/arrayCtrl/arrayCtrl.vue'
 {{- end }}
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
+import { getDictFunc, formatDate, formatBoolean, filterDict, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 {{- if .AutoCreateBtnAuth }}
 // 引入按钮权限标识
 import { useBtnAuth } from '@/utils/btnAuth'
@@ -339,14 +339,41 @@ const formData = ref({
         })
 
 {{- if .HasDataSource }}
-  const dataSource = ref([])
-  const getDataSourceFunc = async()=>{
-    const res = await get{{.StructName}}DataSource()
+  const dataSource = ref({})
+  const dataSourceLoading = ref({})
+  const dataSourceLabelMap = computed(() => {
+    const map = {}
+    Object.keys(dataSource.value || {}).forEach((field) => {
+      map[field] = {}
+      ;(dataSource.value[field] || []).forEach((item) => {
+        map[field][item.value] = item.label
+      })
+    })
+    return map
+  })
+  const getDataSourceLabel = (field, value) => {
+    if (value === null || value === undefined) return '-'
+    return dataSourceLabelMap.value[field]?.[value] ?? value
+  }
+  const getDataSourceLabels = (field, values) => {
+    if (!Array.isArray(values)) return []
+    return values.map((value) => getDataSourceLabel(field, value))
+  }
+  const fetchDataSource = async (field, keyword = '') => {
+    dataSourceLoading.value[field] = true
+    const res = await get{{.StructName}}DataSource({ field, keyword, page: 1, pageSize: 20 })
+    dataSourceLoading.value[field] = false
     if (res.code === 0) {
-      dataSource.value = res.data
+      dataSource.value[field] = res.data?.list || []
     }
   }
-  getDataSourceFunc()
+  const onDataSourceVisibleChange = (field, visible) => {
+    if (!visible || (dataSource.value[field] && dataSource.value[field].length > 0)) return
+    fetchDataSource(field)
+  }
+  {{- range $key, $value := .DataSourceMap }}
+  fetchDataSource("{{$key}}")
+  {{- end }}
 {{- end }}
 
 

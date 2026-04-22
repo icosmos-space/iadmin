@@ -11,6 +11,27 @@ type PageInfo struct {
 	Keyword  string `json:"keyword" form:"keyword"`   // 关键字
 }
 
+// DataSourceQuery 数据源查询参数
+type DataSourceQuery struct {
+	Field string `json:"field" form:"field"` // 数据源字段名
+	PageInfo
+}
+
+// DataSourceItem 数据源选项
+type DataSourceItem struct {
+	Label any `json:"label"`
+	Value any `json:"value"`
+}
+
+// DataSourceResult 数据源分页结果
+type DataSourceResult struct {
+	List     []map[string]any `json:"list"`
+	Total    int64            `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"pageSize"`
+	HasMore  bool             `json:"hasMore"`
+}
+
 func (r *PageInfo) Paginate() func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if r.Page <= 0 {

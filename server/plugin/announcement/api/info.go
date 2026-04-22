@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/icosmos-space/iadmin/server/global"
+	commonReq "github.com/icosmos-space/iadmin/server/model/common/request"
 	"github.com/icosmos-space/iadmin/server/model/common/response"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model"
 	"github.com/icosmos-space/iadmin/server/plugin/announcement/model/request"
@@ -159,8 +160,13 @@ func (a *info) GetInfoList(c *gin.Context) {
 // @Success 200 {object} response.Response{data=object,msg=string} "查询成功"
 // @Router /info/getInfoDataSource [get]
 func (a *info) GetInfoDataSource(c *gin.Context) {
+	var query commonReq.DataSourceQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
 	// 此接口为获取数据源定义的数据
-	dataSource, err := serviceInfo.GetInfoDataSource()
+	dataSource, err := serviceInfo.GetInfoDataSource(query)
 	if err != nil {
 		global.IADMIN_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
