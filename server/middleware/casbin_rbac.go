@@ -27,6 +27,11 @@ func CasbinHandler() gin.HandlerFunc {
 		obj := strings.TrimPrefix(path, global.IADMIN_CONFIG.System.RouterPrefix)
 		// 获取请求方法
 		act := c.Request.Method
+		// 菜单树接口默认允许所有已登录后台角色访问，具体菜单内容仍由角色菜单关联控制。
+		if obj == "/menu/getMenu" && act == "POST" {
+			c.Next()
+			return
+		}
 		// 获取用户的角色
 		sub := strconv.Itoa(int(waitUse.AuthorityId))
 		e := utils.GetCasbin() // 判断策略中是否存在
