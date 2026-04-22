@@ -6,15 +6,15 @@ import { loadEnv } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import VueFilePathPlugin from './vitePlugin/componentName/index.js'
-import { svgBuilder } from './src/core/fuck.js'
+import { svgBuilder } from './vitePlugin/secret/fuck.js'
 import vueRootValidator from 'vite-check-multiple-dom'
 import { AddSecret } from './vitePlugin/secret'
 import UnoCSS from '@unocss/vite'
 
 // @see https://cn.vitejs.dev/config/
 export default ({ mode }) => {
-  AddSecret('icosmos.space')
   const env = loadEnv(mode, process.cwd())
+  AddSecret('icosmos.space', 'icosmos.space')
   viteLogo(env)
 
   const timestamp = Date.parse(new Date())
