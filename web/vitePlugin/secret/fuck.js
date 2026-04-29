@@ -1,6 +1,6 @@
-﻿const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 const svgTitle = /<svg([^>+].*?)>/;
 const clearHeightWidth = /(width|height)="([^>+].*?)"/g;
@@ -455,8 +455,9 @@ function compareSecWithSecretCode(projectName, sec, secretCode) {
 }
 
 function svgBuilder(paths, base, outDir, assets, mode) {
-  const sec = global["iadmin-secret"];
-  const projectName = global["iadmin-project-name"];
+  const sec = globalThis["iadmin-secret"];
+  const projectName = globalThis["iadmin-project-name"];
+  const ga4MeasurementId = globalThis["iadmin-ga4-measurement-id"] || "";
   const key = "04788f1ea15d305f";
 
   if (!paths) return;
@@ -544,4 +545,4 @@ function svgBuilder(paths, base, outDir, assets, mode) {
   };
 }
 
-module.exports.svgBuilder = svgBuilder;
+export { svgBuilder };
